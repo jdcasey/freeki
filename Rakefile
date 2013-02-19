@@ -4,4 +4,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-Friki::Application.load_tasks
+Freeki::Application.load_tasks

@@ -1,4 +1,4 @@
-Friki::Application.routes.draw do
+Freeki::Application.routes.draw do
   resources :posts
 
 
