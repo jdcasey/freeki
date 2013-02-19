@@ -1,0 +1,24 @@
+<form>
+  
+  <div class="wmd-panel">
+    <b>Page URL:</b>&nbsp;&nbsp;<em>/pages/<em>
+    <input size="40" type="text" name="title" value="<%= @title %>" autofocus>
+    <div>(<em>NOTE: Be nice to others; don't use spaces, use hyphens ('-') or underscores ('_')</em>)</div>
+  </div>
+  <br/>
+  <br/>
+  <div class="wmd-panel">
+    <div id="wmd-button-bar"></div>
+    <textarea class="wmd-input" id="wmd-input" name="content"><%= @content %></textarea>
+  </div>
+  <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+  
+  <br/>
+  <br/>
+  <button>Create</button> <a data-type="back">Back</a>
+
+</form>
+
+<script type="text/javascript" charset="utf-8">
+  new Markdown.Editor(new Markdown.Converter()).run();
+</script>
