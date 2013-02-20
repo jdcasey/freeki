@@ -27,7 +27,7 @@ class New extends Spine.Controller
     page = Page.fromForm(e.target)
     page.content = '#' + page.title + "\n" + page.content
     page.path = page.title.toLowerCase()
-    page.path = page.path.replace(new RegExp('[,!?&\\/\\\\]', 'g'), '')
+    page.path = page.path.replace(new RegExp('[,!?&\\\\]', 'g'), '')
     page.path = page.path.replace(new RegExp(' +', 'g'), '-')
     
     if confirm( page.path )
@@ -70,9 +70,11 @@ class Show extends Spine.Controller
     @markdown = new Markdown.Converter
     
     @active (params) ->
-      @change(params.path)
+      alert( "Params: " + JSON.stringify( params ) )
+      @change(params.match[1])
 
   change: (path) ->
+    alert( "++Path: " + path )
     @item = Page.findByAttribute('path', path)
     alert( @item )
     @render()
@@ -127,8 +129,8 @@ class App.Pages extends Spine.Stack
     
   routes:
     '/pages/new':        'new'
-    '/pages/:path/edit': 'edit'
-    '/pages/:path':      'show'
+    '/pages/*path/edit': 'edit'
+    '/pages/*path':      'show'
     '/pages':        'index'
     
   default: 'index'
