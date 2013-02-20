@@ -18,8 +18,7 @@ class App extends Spine.Controller
     # Initialize controllers:
     #  @append(@items = new App.Items)
     #  ...
-    @append(@posts = new App.Posts)
-    @log( 'This is a test. App loaded.' )
+    @append(@pages = new App.Pages)
     
     Spine.Route.setup()    
 

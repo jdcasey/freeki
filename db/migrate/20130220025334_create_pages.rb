@@ -1,7 +1,8 @@
-class CreatePosts < ActiveRecord::Migration
+class CreatePages < ActiveRecord::Migration
   def change
-    create_table :posts do |t|
+    create_table :pages do |t|
       t.string :title
+      t.string :path
       t.string :content
 
       t.timestamps

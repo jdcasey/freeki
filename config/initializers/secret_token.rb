@@ -4,4 +4,4 @@
 # If you change this key, all old signed cookies will become invalid!
 # Make sure the secret is at least 30 characters and all random,
 # no regular words or you'll be exposed to dictionary attacks.
-Freeki::Application.config.secret_token = '769e52608fb24a8a6eb23e173f571bdd20c9933c72b9228a5c04f77faae1bddde9e1e6d57339b253c8dc3f6e227466977063c928e09bb2dabe0fba969db0e692'
+Freeki::Application.config.secret_token = 'bb521b6bdad69a2a0b71d929ae05c10e484c22cbc788f957d58eabdf8ce458b5ec135e24ce949f774ff1262605f99206ed5d12d771fa0f7f1b2314480d10f2b7'

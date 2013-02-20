@@ -1,10 +1,10 @@
-# $ = jQuery.sub()
-Post = App.Post
+#$ = jQuery.sub()
+Page = App.Page
 
 $.fn.item = ->
   elementID   = $(@).data('id')
   elementID or= $(@).parents('[data-id]').data('id')
-  Post.find(elementID)
+  Page.find(elementID)
 
 class New extends Spine.Controller
   events:
@@ -16,15 +16,21 @@ class New extends Spine.Controller
     @active @render
     
   render: ->
-    @html @view('posts/new')
+    @html @view('pages/new')
 
   back: ->
-    @navigate '/posts'
+    @navigate '/pages'
 
   submit: (e) ->
     e.preventDefault()
-    post = Post.fromForm(e.target).save()
-    @navigate '/posts', post.id if post
+    
+    page = Page.fromForm(e.target)
+    page.path = page.title.toLowerCase().replace(new RegExp(' +', 'g'), '-')
+    
+    if confirm( page.path )
+      page = page.save()
+    
+      @navigate page.path if page
 
 class Edit extends Spine.Controller
   events:
@@ -34,22 +40,22 @@ class Edit extends Spine.Controller
   constructor: ->
     super
     @active (params) ->
-      @change(params.id)
+      @change(params.path)
       
-  change: (id) ->
-    @item = Post.find(id)
+  change: (path) ->
+    @item = Page.findByAttribute('path', path)
     @render()
     
   render: ->
-    @html @view('posts/edit')(@item)
+    @html @view('pages/edit')(@item)
 
   back: ->
-    @navigate '/posts'
+    @navigate '/pages'
 
   submit: (e) ->
     e.preventDefault()
     @item.fromForm(e.target).save()
-    @navigate '/posts'
+    @navigate '/pages'
 
 class Show extends Spine.Controller
   events:
@@ -61,20 +67,21 @@ class Show extends Spine.Controller
     @markdown = new Markdown.Converter
     
     @active (params) ->
-      @change(params.id)
+      @change(params.path)
 
-  change: (id) ->
-    @item = Post.find(id)
+  change: (path) ->
+    @item = Page.findByAttribute('path', path)
+    alert( @item )
     @render()
 
   render: ->
-    @html @view('posts/show')(@)
+    @html @view('pages/show')(@)
 
   edit: ->
-    @navigate '/posts', @item.id, 'edit'
+    @navigate '/pages', @item.path, 'edit'
 
   back: ->
-    @navigate '/posts'
+    @navigate '/pages'
 
 class Index extends Spine.Controller
   events:
@@ -85,16 +92,16 @@ class Index extends Spine.Controller
 
   constructor: ->
     super
-    Post.bind 'refresh change', @render
-    Post.fetch()
+    Page.bind 'refresh change', @render
+    Page.fetch()
     
   render: =>
-    posts = Post.all()
-    @html @view('posts/index')(posts: posts)
+    pages = Page.all()
+    @html @view('pages/index')(pages: pages)
     
   edit: (e) ->
     item = $(e.target).item()
-    @navigate '/posts', item.id, 'edit'
+    @navigate '/pages', item.path, 'edit'
     
   destroy: (e) ->
     item = $(e.target).item()
@@ -102,12 +109,13 @@ class Index extends Spine.Controller
     
   show: (e) ->
     item = $(e.target).item()
-    @navigate '/posts', item.id
+    alert( '/pages/' + item.path )
+    @navigate '/pages', item.path
     
   new: ->
-    @navigate '/posts/new'
+    @navigate '/pages/new'
     
-class App.Posts extends Spine.Stack
+class App.Pages extends Spine.Stack
   controllers:
     index: Index
     edit:  Edit
@@ -115,10 +123,10 @@ class App.Posts extends Spine.Stack
     new:   New
     
   routes:
-    '/posts/new':      'new'
-    '/posts/:id/edit': 'edit'
-    '/posts/:id':      'show'
-    '/posts':          'index'
+    '/pages/new':        'new'
+    '/pages/:path/edit': 'edit'
+    '/pages/:path':      'show'
+    '/pages':        'index'
     
   default: 'index'
-  className: 'stack posts'
+  className: 'stack pages'

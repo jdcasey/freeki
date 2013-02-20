@@ -2,8 +2,10 @@
 
 one:
   title: MyString
+  path: MyString
   content: MyString
 
 two:
   title: MyString
+  path: MyString
   content: MyString

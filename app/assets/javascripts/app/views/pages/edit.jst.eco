@@ -1,9 +1,7 @@
 <form>
   
   <div class="wmd-panel">
-    <b>Page URL:</b>&nbsp;&nbsp;<em>/pages/<em>
-    <input size="40" type="text" name="title" value="<%= @title %>" autofocus>
-    <div>(<em>NOTE: Be nice to others; don't use spaces, use hyphens ('-') or underscores ('_')</em>)</div>
+    <b><%= @title %></b>
   </div>
   <br/>
   <br/>
