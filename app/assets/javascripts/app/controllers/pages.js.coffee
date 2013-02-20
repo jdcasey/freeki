@@ -25,12 +25,15 @@ class New extends Spine.Controller
     e.preventDefault()
     
     page = Page.fromForm(e.target)
-    page.path = page.title.toLowerCase().replace(new RegExp(' +', 'g'), '-')
+    page.content = '#' + page.title + "\n" + page.content
+    page.path = page.title.toLowerCase()
+    page.path = page.path.replace(new RegExp('[,!?&\\/\\\\]', 'g'), '')
+    page.path = page.path.replace(new RegExp(' +', 'g'), '-')
     
     if confirm( page.path )
       page = page.save()
     
-      @navigate page.path if page
+      @navigate '/pages', page.path if page
 
 class Edit extends Spine.Controller
   events:
@@ -54,8 +57,8 @@ class Edit extends Spine.Controller
 
   submit: (e) ->
     e.preventDefault()
-    @item.fromForm(e.target).save()
-    @navigate '/pages'
+    @item = @item.fromForm(e.target).save()
+    @navigate '/pages', @item.path
 
 class Show extends Spine.Controller
   events:
