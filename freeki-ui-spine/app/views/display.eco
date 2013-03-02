@@ -1,0 +1,13 @@
+<header>
+  <a class="edit">Edit</a>
+</header>
+
+<div class="content">
+  <p><%= @item.title %></p>
+<!--  <p><%= @item.created %></p>
+  <p><%= @item.updated %></p>
+  <p><%= @item.currentAuthor %></p> -->
+  <br/>
+  <br/>
+  <%- @markdown.makeHtml( @item.content ) if @item.content %>
+</div>

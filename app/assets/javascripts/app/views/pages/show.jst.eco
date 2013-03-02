@@ -1,3 +1,0 @@
-<a data-type="edit">Edit</a> <a data-type="back">Back</a>
-
-<%- @markdown.makeHtml( @item.content ) %>
