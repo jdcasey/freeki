@@ -21,7 +21,7 @@ import org.commonjava.util.logging.Logger;
 import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.json.ser.JsonSerializer;
 
-@Path( "/wiki" )
+@Path( "/docs" )
 public class PageResource
 {
 
