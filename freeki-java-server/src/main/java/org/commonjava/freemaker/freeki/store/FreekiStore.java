@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.commonjava.freemaker.freeki.conf.FreekiConfig;
+import org.commonjava.freemaker.freeki.model.Group;
 import org.commonjava.freemaker.freeki.model.Page;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.json.ser.JsonSerializer;
@@ -88,9 +89,9 @@ public class FreekiStore
         return result;
     }
 
-    public void storeGroup( final String group )
+    public void storeGroup( final Group group )
     {
-        final File groupDir = getFile( group, null );
+        final File groupDir = getFile( group.getName(), null );
         if ( !groupDir.exists() )
         {
             groupDir.mkdirs();
@@ -161,17 +162,23 @@ public class FreekiStore
         }
     }
 
-    public Set<String> listGroups()
+    public Set<Group> listGroups( final String subgroup )
     {
         final File root = config.getStorageDir();
-        final String[] names = root.isDirectory() ? root.list() : new String[] {};
-        final Set<String> groups = new HashSet<String>( names.length );
+        File dir = root;
+        if ( subgroup != null )
+        {
+            dir = new File( dir, subgroup );
+        }
+
+        final String[] names = dir.isDirectory() ? dir.list() : new String[] {};
+        final Set<Group> groups = new HashSet<Group>( names.length );
         for ( final String name : names )
         {
-            final File f = new File( root, name );
+            final File f = new File( dir, name );
             if ( f.isDirectory() )
             {
-                groups.add( name );
+                groups.add( new Group( subgroup, name ) );
             }
         }
 

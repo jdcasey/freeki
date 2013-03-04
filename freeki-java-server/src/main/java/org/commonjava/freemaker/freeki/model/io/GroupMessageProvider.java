@@ -16,30 +16,30 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.commonjava.freemaker.freeki.model.Page;
+import org.commonjava.freemaker.freeki.model.Group;
 import org.commonjava.web.json.ser.JsonSerializer;
 
 @Provider
 @Consumes( MediaType.APPLICATION_JSON )
 @Produces( MediaType.APPLICATION_JSON )
-public class PageMessageProvider
-    implements MessageBodyReader<Page>, MessageBodyWriter<Page>
+public class GroupMessageProvider
+    implements MessageBodyReader<Group>, MessageBodyWriter<Group>
 {
 
     @Inject
     private JsonSerializer serializer;
 
     @Override
-    public Page readFrom( final Class<Page> type, final Type genericType, final Annotation[] annotations,
-                          final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders,
-                          final InputStream entityStream )
+    public Group readFrom( final Class<Group> type, final Type genericType, final Annotation[] annotations,
+                           final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders,
+                           final InputStream entityStream )
         throws IOException, WebApplicationException
     {
-        return serializer.fromStream( entityStream, "UTF-8", Page.class );
+        return serializer.fromStream( entityStream, "UTF-8", Group.class );
     }
 
     @Override
-    public void writeTo( final Page t, final Class<?> type, final Type genericType, final Annotation[] annotations,
+    public void writeTo( final Group t, final Class<?> type, final Type genericType, final Annotation[] annotations,
                          final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders,
                          final OutputStream entityStream )
         throws IOException, WebApplicationException
@@ -52,11 +52,11 @@ public class PageMessageProvider
     public boolean isWriteable( final Class<?> type, final Type genericType, final Annotation[] annotations,
                                 final MediaType mediaType )
     {
-        return Page.class.isAssignableFrom( type );
+        return Group.class.isAssignableFrom( type );
     }
 
     @Override
-    public long getSize( final Page t, final Class<?> type, final Type genericType, final Annotation[] annotations,
+    public long getSize( final Group t, final Class<?> type, final Type genericType, final Annotation[] annotations,
                          final MediaType mediaType )
     {
         return serializer.toString( t )
@@ -67,6 +67,7 @@ public class PageMessageProvider
     public boolean isReadable( final Class<?> type, final Type genericType, final Annotation[] annotations,
                                final MediaType mediaType )
     {
-        return Page.class.isAssignableFrom( type );
+        return Group.class.isAssignableFrom( type );
     }
+
 }

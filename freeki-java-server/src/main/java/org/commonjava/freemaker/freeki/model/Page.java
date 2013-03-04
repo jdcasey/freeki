@@ -237,12 +237,15 @@ public class Page
             }
             else if ( commentStarted )
             {
-                final String[] parts = line.split( "\\s*:\\s*" );
-                if ( parts.length == 2 )
+                final int idx = line.indexOf( ':' );
+                if ( idx > 0 )
                 {
-                    final String key = parts[0].trim()
-                                               .toLowerCase();
-                    final String value = parts[1].trim();
+                    final String key = line.substring( 0, idx )
+                                           .trim()
+                                           .toLowerCase();
+
+                    final String value = line.substring( idx + 1 )
+                                             .trim();
 
                     if ( TITLE.equals( key ) )
                     {
@@ -314,12 +317,21 @@ public class Page
             }
             else if ( headerStarted )
             {
-                final String[] parts = line.split( "\\s*:\\s*" );
-                if ( parts.length == 2 && TITLE.equals( parts[0].trim()
-                                                                .toLowerCase() ) )
+                final int idx = line.indexOf( ':' );
+                if ( idx > 0 )
                 {
-                    title = parts[1].trim();
-                    break;
+                    final String key = line.substring( 0, idx )
+                                           .trim()
+                                           .toLowerCase();
+
+                    final String value = line.substring( idx + 1 )
+                                             .trim();
+
+                    if ( TITLE.equals( key ) )
+                    {
+                        title = value;
+                        break;
+                    }
                 }
             }
         }

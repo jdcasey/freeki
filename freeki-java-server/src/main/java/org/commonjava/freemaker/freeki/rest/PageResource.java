@@ -26,7 +26,7 @@ import org.commonjava.util.logging.Logger;
 import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.json.ser.JsonSerializer;
 
-@Path( "/{group}" )
+@Path( "/page/{group : .+}" )
 public class PageResource
 {
 
@@ -54,7 +54,7 @@ public class PageResource
     }
 
     @GET
-    @Path( "/{title}" )
+    @Path( "/@/{title}" )
     @Produces( MediaType.APPLICATION_JSON )
     public Page get( @PathParam( "group" ) final String group, @PathParam( "title" ) final String title )
     {
@@ -76,21 +76,22 @@ public class PageResource
 
     @POST
     @Consumes( MediaType.APPLICATION_JSON )
-    public Response store( @PathParam( "group" ) final String group, @Context final HttpServletRequest request )
+    public Response store( final Page pg, @PathParam( "group" ) final String group,
+                           @Context final HttpServletRequest request )
     {
         Response response = Response.status( Status.BAD_REQUEST )
                                     .build();
         try
         {
-            Page pg = null;
-            try
-            {
-                pg = serializer.fromRequestBody( request, Page.class );
-            }
-            catch ( final RuntimeException e )
-            {
-                logger.error( "Failed to store page for group: %s from request.\nReason: %s", e, group, e.getMessage() );
-            }
+            //            Page pg = null;
+            //            try
+            //            {
+            //                pg = serializer.fromRequestBody( request, Page.class );
+            //            }
+            //            catch ( final RuntimeException e )
+            //            {
+            //                logger.error( "Failed to store page for group: %s from request.\nReason: %s", e, group, e.getMessage() );
+            //            }
 
             if ( pg != null )
             {
@@ -112,10 +113,10 @@ public class PageResource
     }
 
     @PUT
-    @Path( "/{title}" )
+    @Path( "/@/{title}" )
     @Consumes( MediaType.APPLICATION_JSON )
-    public Response update( @PathParam( "group" ) final String group, @PathParam( "title" ) final String title,
-                            @Context final HttpServletRequest request )
+    public Response update( final Page pg, @PathParam( "group" ) final String group,
+                            @PathParam( "title" ) final String title, @Context final HttpServletRequest request )
     {
         Response response = Response.status( Status.BAD_REQUEST )
                                     .build();
@@ -129,16 +130,16 @@ public class PageResource
             }
             else
             {
-                Page pg = null;
-                try
-                {
-                    pg = serializer.fromRequestBody( request, Page.class );
-                }
-                catch ( final RuntimeException e )
-                {
-                    logger.error( "Failed to store page for group: %s from request.\nReason: %s", e, group,
-                                  e.getMessage() );
-                }
+                //                Page pg = null;
+                //                try
+                //                {
+                //                    pg = serializer.fromRequestBody( request, Page.class );
+                //                }
+                //                catch ( final RuntimeException e )
+                //                {
+                //                    logger.error( "Failed to store page for group: %s from request.\nReason: %s", e, group,
+                //                                  e.getMessage() );
+                //                }
 
                 if ( pg != null )
                 {
@@ -162,7 +163,7 @@ public class PageResource
     }
 
     @DELETE
-    @Path( "/{title}" )
+    @Path( "/@/{title}" )
     public Response delete( @PathParam( "group" ) final String group, @PathParam( "title" ) final String title )
     {
         Response response;
