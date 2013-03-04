@@ -1,17 +1,22 @@
 package org.commonjava.freemaker.freeki.rest;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -21,7 +26,7 @@ import org.commonjava.util.logging.Logger;
 import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.json.ser.JsonSerializer;
 
-@Path( "/docs" )
+@Path( "/{group}" )
 public class PageResource
 {
 
@@ -34,57 +39,43 @@ public class PageResource
     private JsonSerializer serializer;
 
     @GET
-    public Response listGroups()
+    @Produces( MediaType.APPLICATION_JSON )
+    public Listing<String> list( @PathParam( "group" ) final String group )
     {
-        final Set<String> groups = store.listGroups();
-        return Response.ok( serializer.toString( new Listing<String>( groups ) ) )
-                       .build();
-    }
-
-    @GET
-    @Path( "/{group}" )
-    public Response list( @PathParam( "group" ) final String group )
-    {
-        Response response = Response.status( Status.NOT_FOUND )
-                                    .build();
         if ( store.hasGroup( group ) )
         {
-            final Set<String> metadata = store.list( group );
-            response = Response.ok( serializer.toString( new Listing<String>( metadata ) ) )
-                               .build();
+            final List<String> pages = new ArrayList<String>( store.listPages( group ) );
+            Collections.sort( pages );
+
+            return new Listing<String>( pages );
         }
 
-        return response;
+        return null;
     }
 
     @GET
-    @Path( "/{group}/{title}" )
-    public Response get( @PathParam( "group" ) final String group, @PathParam( "title" ) final String title )
+    @Path( "/{title}" )
+    @Produces( MediaType.APPLICATION_JSON )
+    public Page get( @PathParam( "group" ) final String group, @PathParam( "title" ) final String title )
     {
-        Response response = Response.status( Status.NOT_FOUND )
-                                    .build();
-
         if ( store.hasPage( group, title ) )
         {
             try
             {
                 final Page pg = store.getPage( group, title );
-                response = Response.ok( serializer.toString( pg ) )
-                                   .build();
+                return pg;
             }
             catch ( final IOException e )
             {
                 logger.error( "Failed to retrieve page: %s in group: %s.\nReason: %s", e, title, group, e.getMessage() );
-                response = Response.serverError()
-                                   .build();
             }
         }
 
-        return response;
+        return null;
     }
 
     @POST
-    @Path( "/{group}" )
+    @Consumes( MediaType.APPLICATION_JSON )
     public Response store( @PathParam( "group" ) final String group, @Context final HttpServletRequest request )
     {
         Response response = Response.status( Status.BAD_REQUEST )
@@ -121,7 +112,8 @@ public class PageResource
     }
 
     @PUT
-    @Path( "/{group}/{title}" )
+    @Path( "/{title}" )
+    @Consumes( MediaType.APPLICATION_JSON )
     public Response update( @PathParam( "group" ) final String group, @PathParam( "title" ) final String title,
                             @Context final HttpServletRequest request )
     {
@@ -170,7 +162,7 @@ public class PageResource
     }
 
     @DELETE
-    @Path( "/{group}/{title}" )
+    @Path( "/{title}" )
     public Response delete( @PathParam( "group" ) final String group, @PathParam( "title" ) final String title )
     {
         Response response;
@@ -183,27 +175,6 @@ public class PageResource
         catch ( final IOException e )
         {
             logger.error( "Failed to delete (or possibly prune): %s in %s. Reason: %s", e, title, group, e.getMessage() );
-            response = Response.serverError()
-                               .build();
-        }
-
-        return response;
-    }
-
-    @DELETE
-    @Path( "/{group}" )
-    public Response deleteGroup( @PathParam( "group" ) final String group )
-    {
-        Response response;
-        try
-        {
-            store.delete( group, null );
-            response = Response.ok()
-                               .build();
-        }
-        catch ( final IOException e )
-        {
-            logger.error( "Failed to delete group: %s. Reason: %s", e, group, e.getMessage() );
             response = Response.serverError()
                                .build();
         }

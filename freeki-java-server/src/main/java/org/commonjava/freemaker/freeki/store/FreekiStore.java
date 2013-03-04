@@ -41,11 +41,11 @@ public class FreekiStore
 
     public boolean hasPage( final String group, final String title )
     {
-        final File file = getPageFile( group, title );
+        final File file = getFile( group, title );
         return file.isFile();
     }
 
-    public Set<String> list( final String group )
+    public Set<String> listPages( final String group )
     {
         final File root = config.getStorageDir();
         final File d = new File( root, group );
@@ -88,13 +88,22 @@ public class FreekiStore
         return result;
     }
 
+    public void storeGroup( final String group )
+    {
+        final File groupDir = getFile( group, null );
+        if ( !groupDir.exists() )
+        {
+            groupDir.mkdirs();
+        }
+    }
+
     public void storePage( final Page page )
         throws IOException
     {
-        final File pageFile = getPageFile( page.getGroup(), page.getTitle() );
+        final File pageFile = getFile( page.getGroup(), page.getTitle() );
         final File dir = pageFile.getParentFile();
 
-        if ( !dir.mkdirs() )
+        if ( !dir.isDirectory() && !dir.mkdirs() )
         {
             throw new IOException( "Failed to create directory structure for page: " + dir.getAbsolutePath() );
         }
@@ -102,32 +111,32 @@ public class FreekiStore
         write( pageFile, page.render() );
     }
 
-    private File getPageFile( final String group, final String title )
+    private File getFile( final String group, final String title )
     {
         final File root = config.getStorageDir();
         final File groupDir = new File( root, group );
-        return new File( groupDir, pageFilename( title ) + ".md" );
+        return title == null ? groupDir : new File( groupDir, pageFilename( title ) + ".md" );
     }
 
     private String pageFilename( final String title )
     {
         return title.toLowerCase()
-                    .replaceAll( "(^[-_a-zA-Z0-9])+", "-" );
+                    .replaceAll( "[^-_a-zA-Z0-9]+", "-" );
     }
 
     public Page getPage( final String group, final String title )
         throws IOException
     {
-        final File file = getPageFile( group, title );
+        final File file = getFile( group, title );
         final String content = readFileToString( file );
 
-        return new Page( content );
+        return new Page( content, file.lastModified() );
     }
 
     public void delete( final String group, final String title )
         throws IOException
     {
-        File file = getPageFile( group, title );
+        File file = getFile( group, title );
         if ( file == null )
         {
             file = new File( config.getStorageDir(), group );
@@ -155,7 +164,7 @@ public class FreekiStore
     public Set<String> listGroups()
     {
         final File root = config.getStorageDir();
-        final String[] names = root.list();
+        final String[] names = root.isDirectory() ? root.list() : new String[] {};
         final Set<String> groups = new HashSet<String>( names.length );
         for ( final String name : names )
         {

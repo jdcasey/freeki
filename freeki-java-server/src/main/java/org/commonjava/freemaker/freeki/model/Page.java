@@ -1,5 +1,7 @@
 package org.commonjava.freemaker.freeki.model;
 
+import static org.commonjava.freemaker.freeki.model.io.DateSerializer.DATE_FORMAT;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -9,19 +11,18 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.LineIterator;
-import org.commonjava.freemaker.freeki.model.io.PageJsonAdapter;
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.json.ser.JsonAdapters;
 
-@JsonAdapters( PageJsonAdapter.class )
 public class Page
 {
 
-    public static final String CREATED = "Created: ";
+    public static final String CREATED = "created";
 
-    public static final String CURRENT_AUTHOR = "Current-Author: ";
+    public static final String CURRENT_AUTHOR = "current-author";
 
-    private static final String TITLE = "Title: ";
+    private static final String GROUP = "group";
+
+    private static final String TITLE = "title";
 
     private static final String COMMENT_START = "<!---";
 
@@ -31,15 +32,13 @@ public class Page
 
     private static final String KVS = ": ";
 
-    private static final String DATE_FORMAT = "yyyy-MM-dd hh:mm Z";
-
-    private final Logger logger = new Logger( getClass() );
+    private transient final Logger logger = new Logger( getClass() );
 
     private String title;
 
-    private Date created;
+    private Date created = new Date();
 
-    private Date updated;
+    private Date updated = new Date();
 
     private String currentAuthor;
 
@@ -57,9 +56,10 @@ public class Page
         this.title = title;
     }
 
-    public Page( final String content )
+    public Page( final String content, final long lastUpdated )
     {
         this.content = content;
+        this.updated = new Date( lastUpdated );
         parse();
     }
 
@@ -182,6 +182,10 @@ public class Page
           .append( KVS )
           .append( title )
           .append( LS )
+          .append( GROUP )
+          .append( KVS )
+          .append( group )
+          .append( LS )
           .append( CREATED )
           .append( KVS )
           .append( new SimpleDateFormat( DATE_FORMAT ).format( created ) )
@@ -228,6 +232,7 @@ public class Page
             else if ( line.trim()
                           .endsWith( COMMENT_END ) )
             {
+                headerSize++;
                 break;
             }
             else if ( commentStarted )
@@ -242,6 +247,10 @@ public class Page
                     if ( TITLE.equals( key ) )
                     {
                         this.title = value;
+                    }
+                    else if ( GROUP.equals( key ) )
+                    {
+                        this.group = value;
                     }
                     else if ( CREATED.equals( key ) )
                     {
