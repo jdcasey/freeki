@@ -50,6 +50,7 @@ public class GroupResource
     @POST
     @Consumes( MediaType.APPLICATION_JSON )
     public Response create( final Group group, @Context final HttpServletRequest request )
+        throws IOException
     {
         store.storeGroup( group );
 

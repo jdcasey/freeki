@@ -13,16 +13,27 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
 import org.commonjava.freemaker.freeki.conf.FreekiConfig;
 import org.commonjava.freemaker.freeki.model.Group;
 import org.commonjava.freemaker.freeki.model.Page;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.json.ser.JsonSerializer;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.RmCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.storage.file.FileRepository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 public class FreekiStore
 {
+
+    private static final CharSequence README =
+        "This is a marker file for a freeki content group. You can add pages to this group through the UI.";
 
     private final Logger logger = new Logger( getClass() );
 
@@ -31,6 +42,33 @@ public class FreekiStore
 
     @Inject
     private JsonSerializer serializer;
+
+    private Git git;
+
+    private int basepathLength;
+
+    @PostConstruct
+    public void setupGit()
+        throws IOException
+    {
+        basepathLength = config.getStorageDir()
+                               .getPath()
+                               .length() + 1;
+
+        final File gitDir = new File( config.getStorageDir(), ".git" );
+        final boolean create = !gitDir.isDirectory();
+
+        final FileRepositoryBuilder builder = new FileRepositoryBuilder().setGitDir( gitDir )
+                                                                         .readEnvironment();
+
+        final FileRepository repo = builder.build();
+        if ( create )
+        {
+            repo.create();
+        }
+
+        git = new Git( repo );
+    }
 
     public boolean hasGroup( final String group )
     {
@@ -90,11 +128,42 @@ public class FreekiStore
     }
 
     public void storeGroup( final Group group )
+        throws IOException
     {
         final File groupDir = getFile( group.getName(), null );
         if ( !groupDir.exists() )
         {
             groupDir.mkdirs();
+            final File readme = new File( groupDir, "README.txt" );
+            FileUtils.write( readme, README );
+
+            addAndCommit( readme, "Adding new group: " + group.getName() );
+        }
+    }
+
+    private void addAndCommit( final File file, final String message )
+        throws IOException
+    {
+        try
+        {
+            git.add()
+               .addFilepattern( file.getPath() )
+               .call();
+
+            // TODO: Get the authorship info from somewhere...
+            git.commit()
+               .setAll( true )
+               .setMessage( message )
+               .setAuthor( "nobody", "user@nowhere.com" )
+               .call();
+        }
+        catch ( final NoFilepatternException e )
+        {
+            throw new IOException( "Cannot add to git: " + e.getMessage(), e );
+        }
+        catch ( final GitAPIException e )
+        {
+            throw new IOException( "Cannot add to git: " + e.getMessage(), e );
         }
     }
 
@@ -109,7 +178,11 @@ public class FreekiStore
             throw new IOException( "Failed to create directory structure for page: " + dir.getAbsolutePath() );
         }
 
+        final boolean update = pageFile.exists();
+
         write( pageFile, page.render() );
+        addAndCommit( pageFile, ( update ? "Updating" : "Creating" ) + " page: " + page.getTitle() + " in group: "
+            + page.getGroup() );
     }
 
     private File getFile( final String group, final String title )
@@ -143,14 +216,17 @@ public class FreekiStore
             file = new File( config.getStorageDir(), group );
         }
 
+        final Set<File> deleted = new HashSet<File>();
         if ( file.isDirectory() )
         {
             forceDelete( file );
+            deleted.add( file );
             file = file.getParentFile();
         }
         else
         {
             file.delete();
+            deleted.add( file );
             file = file.getParentFile();
         }
 
@@ -158,8 +234,44 @@ public class FreekiStore
                                              .equals( file ) && file.list().length < 1 )
         {
             file.delete();
+            deleted.add( file );
             file = file.getParentFile();
         }
+
+        deleteAndCommit( deleted, "Removing page: " + title + " from group: " + group
+            + ", and pruning empty directories." );
+    }
+
+    private void deleteAndCommit( final Set<File> deleted, final String message )
+        throws IOException
+    {
+        try
+        {
+            final RmCommand rm = git.rm();
+            for ( final File file : deleted )
+            {
+                rm.addFilepattern( file.getPath()
+                                       .substring( basepathLength ) );
+            }
+
+            rm.call();
+
+            // TODO: Get the authorship info from somewhere...
+            git.commit()
+               .setAll( true )
+               .setMessage( message )
+               .setAuthor( "nobody", "user@nowhere.com" )
+               .call();
+        }
+        catch ( final NoFilepatternException e )
+        {
+            throw new IOException( "Cannot remove from git: " + e.getMessage(), e );
+        }
+        catch ( final GitAPIException e )
+        {
+            throw new IOException( "Cannot remove from git: " + e.getMessage(), e );
+        }
+
     }
 
     public Set<Group> listGroups( final String subgroup )
