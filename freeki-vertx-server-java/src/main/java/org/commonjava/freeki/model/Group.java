@@ -1,6 +1,6 @@
-package org.commonjava.freemaker.freeki.model;
+package org.commonjava.freeki.model;
 
-import static org.commonjava.freemaker.freeki.util.UrlUtils.buildUrl;
+import static org.commonjava.freeki.util.UrlUtils.buildUrl;
 
 import java.io.File;
 import java.net.MalformedURLException;

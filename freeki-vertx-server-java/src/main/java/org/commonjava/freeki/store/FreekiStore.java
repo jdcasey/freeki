@@ -1,4 +1,4 @@
-package org.commonjava.freemaker.freeki.store;
+package org.commonjava.freeki.store;
 
 import static org.apache.commons.io.FileUtils.forceDelete;
 import static org.apache.commons.io.FileUtils.readFileToString;
@@ -20,11 +20,11 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
-import org.commonjava.freemaker.freeki.conf.FreekiConfig;
-import org.commonjava.freemaker.freeki.model.ChildRef;
-import org.commonjava.freemaker.freeki.model.ChildRef.ChildType;
-import org.commonjava.freemaker.freeki.model.Group;
-import org.commonjava.freemaker.freeki.model.Page;
+import org.commonjava.freeki.conf.FreekiConfig;
+import org.commonjava.freeki.model.ChildRef;
+import org.commonjava.freeki.model.ChildRef.ChildType;
+import org.commonjava.freeki.model.Group;
+import org.commonjava.freeki.model.Page;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.json.ser.JsonSerializer;
 import org.eclipse.jgit.api.CommitCommand;
@@ -222,7 +222,7 @@ public class FreekiStore
         final File file = getFile( group, title );
         final String content = readFileToString( file );
 
-        return new Page( content, file.lastModified() );
+        return new Page( group, content, file.lastModified() );
     }
 
     public boolean delete( final String group, final String title )

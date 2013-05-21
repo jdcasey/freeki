@@ -1,4 +1,4 @@
-package org.commonjava.freemaker.freeki.model.io;
+package org.commonjava.freeki.model.io;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;

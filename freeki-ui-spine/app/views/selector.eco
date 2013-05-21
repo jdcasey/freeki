@@ -2,8 +2,8 @@
   <input type="search" placeholder="search" results="0" incremental="true" autofocus>
 </header>
 
-<div class="items"></div>
+<div class="selectorItems"></div>
 
 <footer>
-  <button>New Page</button>
+  <button>New Group</button>
 </footer>

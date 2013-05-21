@@ -1,14 +1,18 @@
-package org.commonjava.freemaker.freeki.model;
+package org.commonjava.freeki.model;
 
-import static org.commonjava.freemaker.freeki.model.io.DateSerializer.DATE_FORMAT;
-import static org.commonjava.freemaker.freeki.util.UrlUtils.buildUrl;
+import static org.commonjava.freeki.model.MetadataKeys.CREATED;
+import static org.commonjava.freeki.model.MetadataKeys.CURRENT_AUTHOR;
+import static org.commonjava.freeki.model.MetadataKeys.TITLE;
+import static org.commonjava.freeki.model.MetadataKeys.metadataKey;
+import static org.commonjava.freeki.model.io.DateSerializer.formatDate;
+import static org.commonjava.freeki.model.io.DateSerializer.parseDate;
+import static org.commonjava.freeki.util.UrlUtils.buildUrl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -20,14 +24,6 @@ import org.commonjava.util.logging.Logger;
 @XmlRootElement
 public class Page
 {
-
-    public static final String CREATED = "created";
-
-    public static final String CURRENT_AUTHOR = "current-author";
-
-    private static final String GROUP = "group";
-
-    private static final String TITLE = "title";
 
     private static final String COMMENT_START = "<!---";
 
@@ -59,9 +55,10 @@ public class Page
     {
     }
 
-    public Page( final String content, final long lastUpdated )
+    public Page( final String group, final String content, final long lastUpdated )
         throws MalformedURLException
     {
+        this.group = group;
         this.content = content;
         this.updated = new Date( lastUpdated );
         parse();
@@ -189,17 +186,14 @@ public class Page
         final StringBuilder sb = new StringBuilder();
         sb.append( COMMENT_START )
           .append( LS )
-          .append( TITLE )
+          .append( MetadataKeys.TITLE )
           .append( KVS )
           .append( title )
           .append( LS )
-          .append( GROUP )
-          .append( KVS )
-          .append( group )
           .append( LS )
           .append( CREATED )
           .append( KVS )
-          .append( new SimpleDateFormat( DATE_FORMAT ).format( created ) )
+          .append( formatDate( created ) )
           .append( LS )
           .append( CURRENT_AUTHOR )
           .append( KVS )
@@ -229,6 +223,7 @@ public class Page
 
         boolean commentStarted = false;
         int headerSize = 0;
+
         for ( final String line : lines )
         {
             if ( line.trim()
@@ -254,29 +249,36 @@ public class Page
                     final String value = line.substring( idx + 1 )
                                              .trim();
 
-                    if ( TITLE.equals( key ) )
+                    switch ( metadataKey( key ) )
                     {
-                        this.title = value;
-                    }
-                    else if ( GROUP.equals( key ) )
-                    {
-                        this.group = value;
-                    }
-                    else if ( CREATED.equals( key ) )
-                    {
-                        try
+                        case TITLE:
                         {
-                            this.created = new SimpleDateFormat( DATE_FORMAT ).parse( value );
+                            this.title = value;
+                            break;
                         }
-                        catch ( final ParseException e )
+                        case CREATED:
                         {
-                            logger.error( "Failed to parse creation date '%s' on page: '%s'", value,
-                                          title == null ? "Unknown page" : title );
+                            try
+                            {
+                                this.created = parseDate( value );
+                            }
+                            catch ( final ParseException e )
+                            {
+                                logger.error( "Failed to parse creation date '%s' on page: '%s'", value,
+                                              title == null ? "Unknown page" : title );
+                            }
+
+                            break;
                         }
-                    }
-                    else if ( CURRENT_AUTHOR.equals( key ) )
-                    {
-                        this.currentAuthor = value;
+                        case CURRENT_AUTHOR:
+                        {
+                            this.currentAuthor = value;
+                            break;
+                        }
+                        default:
+                        {
+                            // TODO: freeform metadata...
+                        }
                     }
                 }
             }
@@ -370,7 +372,7 @@ public class Page
     public static String serverPathFor( final String group, final String title )
         throws MalformedURLException
     {
-        return buildUrl( false, "/pages", group, "@", idFor( title ) );
+        return buildUrl( false, group, idFor( title ) );
     }
 
     public static String idFor( final String title )

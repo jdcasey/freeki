@@ -1,0 +1,3 @@
+<div class="selectorItem">
+  <%=   @name if @name  %>
+</div>

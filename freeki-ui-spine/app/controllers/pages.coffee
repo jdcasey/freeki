@@ -8,22 +8,20 @@ PagesIndex   = require('controllers/pages_index')
 class Pages extends Spine.Controller
   className: 'pages'
   
-  constructor: ->
+  constructor: (pagesIndex) ->
     super
     
-    @index = new PagesIndex
+    @index = pagesIndex
     @display = new PagesDisplay
     
     @routes
-      '/pages/:id/edit': (params) ->
+      '/:group/:id/edit': (params) ->
         @index.active(params)
         @display.edit.active(params)
-      '/pages/:id': (params) ->
+      '/:group/:id': (params) ->
         @index.active(params)
         @display.display.active(params)
     
-    @append @index, @display
-    
-    Page.fetch()
+    @append @display
     
 module.exports = Pages

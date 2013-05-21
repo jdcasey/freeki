@@ -26,6 +26,9 @@ class PagesIndex extends Spine.Controller
     @list.bind 'change', @change
     
     @active (params) ->
+      alert(JSON.stringify(params))
+      @currentGroup = params.group
+      Page.setGroup( params.group )
       @list.change(Page.find(params.id))
     
     Page.bind('refresh change', @render)
@@ -39,10 +42,10 @@ class PagesIndex extends Spine.Controller
     @list.render(pages)
   
   change: (item) =>
-    @navigate '/pages', item.id
+    @navigate '/', item.group, '/', item.id
   
   create: ->
     item = Page.create()
-    @navigate('/pages', item.id, 'edit')
+    @navigate('/', item.id, 'edit')
     
 module.exports = PagesIndex

@@ -1,1 +1,3 @@
-.stack>*:not(.active){display:none}
+.stack>*:not(.active) {
+  display: none;
+}
