@@ -1,6 +1,5 @@
-package org.commonjava.freeki.rest;
+package org.commonjava.freeki.routing;
 
-import org.commonjava.freeki.route.Method;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public interface Route

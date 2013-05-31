@@ -1,10 +1,10 @@
 package org.commonjava.freeki.rest;
 
-import static org.commonjava.freeki.route.Method.DELETE;
-import static org.commonjava.freeki.route.Method.GET;
-import static org.commonjava.freeki.route.Method.HEAD;
-import static org.commonjava.freeki.route.Method.POST;
-import static org.commonjava.freeki.route.Method.PUT;
+import static org.commonjava.freeki.routing.Method.DELETE;
+import static org.commonjava.freeki.routing.Method.GET;
+import static org.commonjava.freeki.routing.Method.HEAD;
+import static org.commonjava.freeki.routing.Method.POST;
+import static org.commonjava.freeki.routing.Method.PUT;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
@@ -15,7 +15,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.commonjava.freeki.route.Method;
+import org.commonjava.freeki.routing.Method;
+import org.commonjava.freeki.routing.Route;
 import org.commonjava.mimeparse.MIMEParse;
 import org.pegdown.PegDownProcessor;
 import org.vertx.java.core.http.HttpServerRequest;

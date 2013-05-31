@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.commonjava.freeki.route;
+package org.commonjava.freeki.routing;
 
 import static org.apache.commons.lang.StringUtils.join;
 
@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.commonjava.freeki.rest.Route;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;

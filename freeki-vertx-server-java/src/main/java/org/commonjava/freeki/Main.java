@@ -5,7 +5,7 @@ import groovy.text.GStringTemplateEngine;
 import org.commonjava.freeki.rest.DirContentHandler;
 import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
-import org.commonjava.freeki.route.FreekiRouteMatcher;
+import org.commonjava.freeki.routing.FreekiRouteMatcher;
 import org.pegdown.PegDownProcessor;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpServer;
