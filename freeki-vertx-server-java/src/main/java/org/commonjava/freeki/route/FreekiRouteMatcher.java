@@ -63,9 +63,11 @@ public class FreekiRouteMatcher
     @Override
     public void handle( final HttpServerRequest request )
     {
-        System.out.printf( "REQUEST %s %s\n", request.method(), request.path() );
+        final Method method = Method.valueOf( request.method() );
 
-        final List<PatternBinding> bindings = this.bindings.get( Method.valueOf( request.method() ) );
+        System.out.printf( "REQUEST %s %s\n", method, request.path() );
+
+        final List<PatternBinding> bindings = this.bindings.get( method );
         System.out.printf( "Available bindings:\n  %s\n", join( bindings, "\n  " ) );
         if ( bindings != null )
         {
@@ -99,7 +101,7 @@ public class FreekiRouteMatcher
                     request.params()
                            .set( params );
 
-                    binding.handler.handle( request );
+                    binding.handler.handle( method, request );
                     return;
                 }
             }
@@ -154,8 +156,7 @@ public class FreekiRouteMatcher
         return this;
     }
 
-    private void addPattern( final String input, final Handler<HttpServerRequest> handler,
-                             final List<PatternBinding> bindings )
+    private void addPattern( final String input, final Route handler, final List<PatternBinding> bindings )
     {
         // input is /:name/:path=(.+)/:page
         // route pattern is: /([^\\/]+)/(.+)/([^\\/]+)
@@ -202,12 +203,11 @@ public class FreekiRouteMatcher
     {
         final Pattern pattern;
 
-        final Handler<HttpServerRequest> handler;
+        final Route handler;
 
         final List<String> paramNames;
 
-        private PatternBinding( final Pattern pattern, final List<String> paramNames,
-                                final Handler<HttpServerRequest> handler )
+        private PatternBinding( final Pattern pattern, final List<String> paramNames, final Route handler )
         {
             this.pattern = pattern;
             this.paramNames = paramNames;

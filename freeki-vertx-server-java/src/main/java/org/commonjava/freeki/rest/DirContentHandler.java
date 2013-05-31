@@ -47,7 +47,7 @@ public class DirContentHandler
     }
 
     @Override
-    public void handle( final HttpServerRequest req )
+    public void handle( final Method method, final HttpServerRequest req )
     {
         final String acceptHeader = req.headers()
                                        .get( "Accept" );
