@@ -1,19 +1,27 @@
 package org.commonjava.freeki.rest;
 
+import static org.commonjava.freeki.route.Method.DELETE;
+import static org.commonjava.freeki.route.Method.GET;
+import static org.commonjava.freeki.route.Method.HEAD;
+import static org.commonjava.freeki.route.Method.POST;
+import static org.commonjava.freeki.route.Method.PUT;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
+import groovy.text.GStringTemplateEngine;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.commonjava.freeki.route.Method;
 import org.commonjava.mimeparse.MIMEParse;
 import org.pegdown.PegDownProcessor;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class PageContentHandler
-    implements Handler<HttpServerRequest>
+    implements Route
 {
 
     private static final Set<String> PAGE_ACCEPT = new HashSet<String>()
@@ -30,9 +38,12 @@ public class PageContentHandler
 
     private final PegDownProcessor proc;
 
-    public PageContentHandler( final PegDownProcessor proc )
+    private final GStringTemplateEngine templates;
+
+    public PageContentHandler( final PegDownProcessor proc, final GStringTemplateEngine templates )
     {
         this.proc = proc;
+        this.templates = templates;
     }
 
     @Override
@@ -45,13 +56,32 @@ public class PageContentHandler
         req.response()
            .setStatusCode( 200 );
 
-        System.out.printf( "Page: %s\n", req.uri() );
+        System.out.printf( "Page: %s\n", req.params()
+                                            .get( "page" ) );
+        System.out.printf( "Dir: %s\n", req.params()
+                                           .get( "dir" ) );
 
         final String mimeAccept = MIMEParse.bestMatch( PAGE_ACCEPT, acceptHeader );
         System.out.printf( "Accept header: %s\n", mimeAccept );
 
         req.response()
-           .write( proc.markdownToHtml( "# Page " + req.uri() ) );
+           .write( proc.markdownToHtml( "# Page " + req.params()
+                                                       .get( "page" ) + "\n\n  * Directory: " + req.params()
+                                                                                                   .get( "dir" ) ) );
+        req.response()
+           .end();
+    }
+
+    @Override
+    public Iterable<String> patterns()
+    {
+        return Collections.singleton( "/:dir=(.+)/:page" );
+    }
+
+    @Override
+    public Iterable<Method> methods()
+    {
+        return Arrays.asList( GET, POST, PUT, DELETE, HEAD );
     }
 
 }

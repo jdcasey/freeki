@@ -1,10 +1,14 @@
 package org.commonjava.freeki;
 
-import org.commonjava.freeki.rest.ContentHandler;
+import groovy.text.GStringTemplateEngine;
+
+import org.commonjava.freeki.rest.DirContentHandler;
+import org.commonjava.freeki.rest.OopsHandler;
+import org.commonjava.freeki.rest.PageContentHandler;
+import org.commonjava.freeki.route.FreekiRouteMatcher;
 import org.pegdown.PegDownProcessor;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpServer;
-import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.impl.DefaultVertx;
 import org.vertx.java.platform.Verticle;
 
@@ -19,22 +23,22 @@ public class Main
 
     private final PegDownProcessor proc;
 
-    private final ContentHandler handler;
+    private final GStringTemplateEngine templates;
 
     public Main()
     {
-        super();
         start();
         final Vertx v = new DefaultVertx();
         setVertx( v );
         proc = new PegDownProcessor();
-        handler = new ContentHandler( proc );
+        templates = new GStringTemplateEngine();
     }
 
     public void run()
     {
-        final RouteMatcher rm = new RouteMatcher();
-        rm.get( "/(.+)", handler );
+        final FreekiRouteMatcher rm = new FreekiRouteMatcher().add( new DirContentHandler( proc, templates ) )
+                                                              .add( new PageContentHandler( proc, templates ) )
+                                                              .noMatch( new OopsHandler( proc, templates ) );
 
         final HttpServer http = vertx.createHttpServer();
         http.requestHandler( rm )

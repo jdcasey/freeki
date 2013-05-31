@@ -1,19 +1,27 @@
 package org.commonjava.freeki.rest;
 
+import static org.commonjava.freeki.route.Method.DELETE;
+import static org.commonjava.freeki.route.Method.GET;
+import static org.commonjava.freeki.route.Method.HEAD;
+import static org.commonjava.freeki.route.Method.POST;
+import static org.commonjava.freeki.route.Method.PUT;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
+import groovy.text.GStringTemplateEngine;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.commonjava.freeki.route.Method;
 import org.commonjava.mimeparse.MIMEParse;
 import org.pegdown.PegDownProcessor;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class DirContentHandler
-    implements Handler<HttpServerRequest>
+    implements Route
 {
 
     private static final Set<String> DIR_ACCEPT = new HashSet<String>()
@@ -30,9 +38,12 @@ public class DirContentHandler
 
     private final PegDownProcessor proc;
 
-    public DirContentHandler( final PegDownProcessor proc )
+    private final GStringTemplateEngine templates;
+
+    public DirContentHandler( final PegDownProcessor proc, final GStringTemplateEngine templates )
     {
         this.proc = proc;
+        this.templates = templates;
     }
 
     @Override
@@ -45,13 +56,29 @@ public class DirContentHandler
         req.response()
            .setStatusCode( 200 );
 
-        System.out.printf( "Directory: %s\n", req.uri() );
+        System.out.printf( "Directory: %s\n", req.params()
+                                                 .get( "dir" ) );
 
         final String mimeAccept = MIMEParse.bestMatch( DIR_ACCEPT, acceptHeader );
         System.out.printf( "Accept header: %s\n", mimeAccept );
 
         req.response()
-           .write( proc.markdownToHtml( "# Listing for " + req.uri() + "\n  - file.md\n  - file2.md\n" ) );
+           .write( proc.markdownToHtml( "# Listing for " + req.params()
+                                                              .get( "dir" ) + "\n  - file.md\n  - file2.md\n" ) );
+        req.response()
+           .end();
+    }
+
+    @Override
+    public Iterable<String> patterns()
+    {
+        return Collections.singleton( "/:dir=(.+)/" );
+    }
+
+    @Override
+    public Iterable<Method> methods()
+    {
+        return Arrays.asList( GET, POST, PUT, DELETE, HEAD );
     }
 
 }
