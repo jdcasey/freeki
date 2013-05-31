@@ -57,26 +57,30 @@ public class PageContentHandler
         req.response()
            .setStatusCode( 200 );
 
+        String dir = req.params()
+                        .get( "dir" );
+        if ( dir == null )
+        {
+            dir = "/";
+        }
+
         System.out.printf( "Page: %s\n", req.params()
                                             .get( "page" ) );
-        System.out.printf( "Dir: %s\n", req.params()
-                                           .get( "dir" ) );
+        System.out.printf( "Dir: %s\n", dir );
 
         final String mimeAccept = MIMEParse.bestMatch( PAGE_ACCEPT, acceptHeader );
         System.out.printf( "Accept header: %s\n", mimeAccept );
 
         req.response()
            .write( proc.markdownToHtml( "# Page " + req.params()
-                                                       .get( "page" ) + "\n\n  * Directory: " + req.params()
-                                                                                                   .get( "dir" ) ) );
-        req.response()
-           .end();
+                                                       .get( "page" ) + "\n\n  * Directory: " + dir
+                       + "\n  * MIME Type: " + mimeAccept ) );
     }
 
     @Override
     public Iterable<String> patterns()
     {
-        return Collections.singleton( "/:dir=(.+)/:page" );
+        return Collections.singleton( ":?dir=(/.+)/:page" );
     }
 
     @Override

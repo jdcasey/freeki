@@ -62,58 +62,77 @@ public class FreekiRouteMatcher
     @Override
     public void handle( final HttpServerRequest request )
     {
-        final Method method = Method.valueOf( request.method() );
-
-        System.out.printf( "REQUEST %s %s\n", method, request.path() );
-
-        final List<PatternBinding> bindings = this.bindings.get( method );
-        System.out.printf( "Available bindings:\n  %s\n", join( bindings, "\n  " ) );
-        if ( bindings != null )
+        try
         {
-            for ( final PatternBinding binding : bindings )
+            final Method method = Method.valueOf( request.method() );
+
+            System.out.printf( "REQUEST %s %s\n", method, request.path() );
+
+            final List<PatternBinding> bindings = this.bindings.get( method );
+            System.out.printf( "Available bindings:\n  %s\n", join( bindings, "\n  " ) );
+            if ( bindings != null )
             {
-                final Matcher m = binding.pattern.matcher( request.path() );
-                if ( m.matches() )
+                for ( final PatternBinding binding : bindings )
                 {
-                    System.out.printf( "MATCH: %s\n", binding.handler );
-                    final Map<String, String> params = new HashMap<>( m.groupCount() );
-                    if ( binding.paramNames != null )
+                    final Matcher m = binding.pattern.matcher( request.path() );
+                    if ( m.matches() )
                     {
-                        // Named params
-                        int i = 1;
-                        for ( final String param : binding.paramNames )
+                        System.out.printf( "MATCH: %s\n", binding.handler );
+                        final Map<String, String> params = new HashMap<>( m.groupCount() );
+                        if ( binding.paramNames != null )
                         {
-                            params.put( param, m.group( i ) );
-                            i++;
+                            // Named params
+                            int i = 1;
+                            for ( final String param : binding.paramNames )
+                            {
+                                final String v = m.group( i );
+                                if ( v != null )
+                                {
+                                    params.put( param, v );
+                                }
+                                i++;
+                            }
                         }
-                    }
-                    else
-                    {
-                        // Un-named params
-                        for ( int i = 0; i < m.groupCount(); i++ )
+                        else
                         {
-                            params.put( "param" + i, m.group( i + 1 ) );
+                            // Un-named params
+                            for ( int i = 0; i < m.groupCount(); i++ )
+                            {
+                                final String v = m.group( i + 1 );
+                                if ( v != null )
+                                {
+                                    params.put( "param" + i, v );
+                                }
+                            }
                         }
+
+                        System.out.printf( "PARAMS: %s\n", params );
+                        request.params()
+                               .set( params );
+
+                        binding.handler.handle( method, request );
+                        return;
                     }
-
-                    System.out.printf( "PARAMS: %s\n", params );
-                    request.params()
-                           .set( params );
-
-                    binding.handler.handle( method, request );
-                    return;
                 }
             }
+            if ( noMatchHandler != null )
+            {
+                noMatchHandler.handle( request );
+            }
+            else
+            {
+                // Default 404
+                request.response()
+                       .setStatusCode( 404 );
+            }
         }
-        if ( noMatchHandler != null )
+        catch ( final Throwable t )
         {
-            noMatchHandler.handle( request );
-        }
-        else
-        {
-            // Default 404
             request.response()
-                   .setStatusCode( 404 );
+                   .setStatusCode( 500 );
+        }
+        finally
+        {
             request.response()
                    .end();
         }
@@ -162,13 +181,20 @@ public class FreekiRouteMatcher
         // group list is: [name, path, page], where index+1 == regex-group-number
 
         // We need to search for any :<token name> tokens in the String and replace them with named capture groups
-        final Matcher m = Pattern.compile( ":([A-Za-z][A-Za-z0-9_]*)(=\\([^)]+\\))?" )
+        final Matcher m = Pattern.compile( ":(\\??[A-Za-z][A-Za-z0-9_]*)(=\\([^)]+\\))?" )
                                  .matcher( input );
         final StringBuffer sb = new StringBuffer();
         final List<String> groups = new ArrayList<>();
         while ( m.find() )
         {
-            final String group = m.group( 1 );
+            String group = m.group( 1 );
+            boolean optional = false;
+            if ( group.startsWith( "?" ) )
+            {
+                group = group.substring( 1 );
+                optional = true;
+            }
+
             String pattern = m.group( 2 );
             if ( pattern == null )
             {
@@ -177,6 +203,11 @@ public class FreekiRouteMatcher
             else
             {
                 pattern = pattern.substring( 1 );
+            }
+
+            if ( optional )
+            {
+                pattern += "?";
             }
 
             if ( groups.contains( group ) )

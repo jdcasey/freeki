@@ -11,7 +11,6 @@ import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
 import groovy.text.GStringTemplateEngine;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -57,23 +56,27 @@ public class DirContentHandler
         req.response()
            .setStatusCode( 200 );
 
-        System.out.printf( "Directory: %s\n", req.params()
-                                                 .get( "dir" ) );
+        String dir = req.params()
+                        .get( "dir" );
+        if ( dir == null )
+        {
+            dir = "/";
+        }
+
+        System.out.printf( "Directory: %s\n", dir );
 
         final String mimeAccept = MIMEParse.bestMatch( DIR_ACCEPT, acceptHeader );
         System.out.printf( "Accept header: %s\n", mimeAccept );
 
         req.response()
-           .write( proc.markdownToHtml( "# Listing for " + req.params()
-                                                              .get( "dir" ) + "\n  - file.md\n  - file2.md\n" ) );
-        req.response()
-           .end();
+           .write( proc.markdownToHtml( "# Listing for `" + dir
+                       + "`\n  - file.md\n  - file2.md\n\n\n\n\n## MIME Type: " + mimeAccept ) );
     }
 
     @Override
     public Iterable<String> patterns()
     {
-        return Collections.singleton( "/:dir=(.+)/" );
+        return Arrays.asList( "/:dir=(.+)/", "/" );
     }
 
     @Override

@@ -32,9 +32,6 @@ public class OopsHandler
 
         req.response()
            .write( proc.markdownToHtml( "# NOT FOUND " + req.uri() ) );
-
-        req.response()
-           .end();
     }
 
 }
