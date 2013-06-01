@@ -63,4 +63,10 @@ public class ChildRef
         return comp;
     }
 
+    @Override
+    public String toString()
+    {
+        return String.format( "ChildRef [type=%s, label=%s, id=%s]", type, label, id );
+    }
+
 }

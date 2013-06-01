@@ -6,6 +6,15 @@ enum MetadataKeys
 
     public static MetadataKeys metadataKey( final String name )
     {
-        return valueOf( name );
+        for ( final MetadataKeys k : values() )
+        {
+            if ( k.name()
+                  .equalsIgnoreCase( name ) )
+            {
+                return k;
+            }
+        }
+
+        return null;
     }
 }

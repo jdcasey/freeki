@@ -1,4 +1,4 @@
-package org.commonjava.freeki.routing;
+package org.commonjava.freeki.infra.route;
 
 public enum Method
 {

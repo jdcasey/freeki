@@ -1,7 +1,5 @@
 package org.commonjava.freeki.rest;
 
-import groovy.text.GStringTemplateEngine;
-
 import org.pegdown.PegDownProcessor;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
@@ -12,12 +10,9 @@ public class OopsHandler
 
     private final PegDownProcessor proc;
 
-    private final GStringTemplateEngine templates;
-
-    public OopsHandler( final PegDownProcessor proc, final GStringTemplateEngine templates )
+    public OopsHandler( final PegDownProcessor proc )
     {
         this.proc = proc;
-        this.templates = templates;
     }
 
     @Override

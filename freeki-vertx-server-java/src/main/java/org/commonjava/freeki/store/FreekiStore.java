@@ -26,7 +26,6 @@ import org.commonjava.freeki.model.ChildRef.ChildType;
 import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.model.Page;
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.json.ser.JsonSerializer;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RmCommand;
@@ -46,9 +45,6 @@ public class FreekiStore
     @Inject
     private FreekiConfig config;
 
-    @Inject
-    private JsonSerializer serializer;
-
     private Git git;
 
     private int basepathLength;
@@ -56,6 +52,17 @@ public class FreekiStore
     private String username;
 
     private String email;
+
+    public FreekiStore()
+    {
+    }
+
+    public FreekiStore( final FreekiConfig config )
+        throws IOException
+    {
+        this.config = config;
+        setupGit();
+    }
 
     @PostConstruct
     public void setupGit()
@@ -124,14 +131,17 @@ public class FreekiStore
         final SortedSet<ChildRef> result = new TreeSet<ChildRef>();
         if ( d.isDirectory() )
         {
+            System.out.printf( "Listing children in directory: %s\n", d );
             final File[] files = d.listFiles();
 
             for ( final File file : files )
             {
                 final String name = file.getName();
+                System.out.println( name );
 
                 if ( name.startsWith( "." ) )
                 {
+                    System.out.printf( "Skipping: %s\n", name );
                     continue;
                 }
 
@@ -153,9 +163,10 @@ public class FreekiStore
                     {
                         br = new BufferedReader( new FileReader( file ) );
                         final String title = Page.readTitle( br );
+                        System.out.printf( "Page %s has title: %s\n", file, title );
                         if ( title != null )
                         {
-                            result.add( new ChildRef( ChildType.PAGE, title, Page.serverPathFor( group, title ) ) );
+                            result.add( new ChildRef( ChildType.PAGE, title, Page.idFor( title ) ) );
                         }
                     }
                     catch ( final IOException e )
@@ -211,24 +222,38 @@ public class FreekiStore
 
     private File getFile( final String group, final String title )
     {
+        return getFileById( group, Page.idFor( title ) );
+    }
+
+    private File getFileById( final String group, final String id )
+    {
         final File root = config.getStorageDir();
         final File groupDir = new File( root, group );
-        return title == null ? groupDir : new File( groupDir, Page.idFor( title ) + ".md" );
+        return new File( groupDir, id + ".md" );
     }
 
-    public Page getPage( final String group, final String title )
+    public Page getPage( final String group, final String id )
         throws IOException
     {
-        final File file = getFile( group, title );
+        System.out.printf( "Looking for page: %s in group: %s\n", id, group );
+        final File file = getFileById( group, id );
+        if ( !file.exists() )
+        {
+            System.out.printf( "Not a page: %s\n", file );
+            return null;
+        }
+
+        System.out.printf( "Reading page from: %s\n", file );
         final String content = readFileToString( file );
+        System.out.printf( "Page content:\n\n%s\n\n", content );
 
-        return new Page( group, content, file.lastModified() );
+        return new Page( group, id, content, file.lastModified() );
     }
 
-    public boolean delete( final String group, final String title )
+    public boolean delete( final String group, final String id )
         throws IOException
     {
-        File file = getFile( group, title );
+        File file = getFileById( group, id );
         if ( file == null )
         {
             file = new File( config.getStorageDir(), group );
@@ -258,7 +283,7 @@ public class FreekiStore
 
         if ( !deleted.isEmpty() )
         {
-            deleteAndCommit( deleted, "Removing page: " + title + " from group: " + group
+            deleteAndCommit( deleted, "Removing page: " + id + " from group: " + group
                 + ", and pruning empty directories." );
 
             return true;

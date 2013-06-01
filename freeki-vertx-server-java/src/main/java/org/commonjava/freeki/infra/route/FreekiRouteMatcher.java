@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.commonjava.freeki.routing;
+package org.commonjava.freeki.infra.route;
 
 import static org.apache.commons.lang.StringUtils.join;
 
@@ -128,8 +128,11 @@ public class FreekiRouteMatcher
         }
         catch ( final Throwable t )
         {
+            System.out.printf( "ERROR: %s", t.getMessage() );
+            t.printStackTrace();
             request.response()
-                   .setStatusCode( 500 );
+                   .setStatusCode( 500 )
+                   .setStatusMessage( "Error occurred during processing. See logs for more information." );
         }
         finally
         {

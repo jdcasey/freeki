@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.commonjava.freeki.infra.render.anno.RenderKey;
 
-@XmlRootElement
+@RenderKey( "group" )
 public class Group
     implements Comparable<Group>
 {
@@ -99,6 +99,12 @@ public class Group
     public void setChildren( final SortedSet<ChildRef> children )
     {
         this.children = children;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format( "Group [serverPath=%s, name=%s]", serverPath, name );
     }
 
 }

@@ -16,18 +16,17 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.apache.commons.io.LineIterator;
+import org.commonjava.freeki.infra.render.anno.RenderKey;
 import org.commonjava.util.logging.Logger;
 
-@XmlRootElement
+@RenderKey( "page" )
 public class Page
 {
 
     private static final String COMMENT_START = "<!---";
 
-    private static final String COMMENT_END = "--->";
+    private static final String COMMENT_END = "-->";
 
     private static final char LS = '\n';
 
@@ -55,13 +54,16 @@ public class Page
     {
     }
 
-    public Page( final String group, final String content, final long lastUpdated )
+    public Page( final String group, final String id, final String content, final long lastUpdated )
         throws MalformedURLException
     {
         this.group = group;
         this.content = content;
         this.updated = new Date( lastUpdated );
+
+        System.out.printf( "Parsing page metadata for %s...", id );
         parse();
+        System.out.println( "...done" );
     }
 
     public void repair()
@@ -249,7 +251,14 @@ public class Page
                     final String value = line.substring( idx + 1 )
                                              .trim();
 
-                    switch ( metadataKey( key ) )
+                    final MetadataKeys mk = metadataKey( key );
+                    if ( mk == null )
+                    {
+                        // TODO: freeform metadata...
+                        continue;
+                    }
+
+                    switch ( mk )
                     {
                         case TITLE:
                         {
@@ -277,7 +286,6 @@ public class Page
                         }
                         default:
                         {
-                            // TODO: freeform metadata...
                         }
                     }
                 }
@@ -305,6 +313,7 @@ public class Page
     public static String readTitle( final BufferedReader reader )
         throws IOException
     {
+        System.out.println( "Looking for title in markdown header." );
         if ( reader == null )
         {
             return null;
@@ -319,11 +328,13 @@ public class Page
             if ( line.trim()
                      .startsWith( COMMENT_START ) )
             {
+                System.out.println( "In header." );
                 headerStarted = true;
             }
             else if ( line.trim()
-                          .startsWith( COMMENT_END ) )
+                          .endsWith( COMMENT_END ) )
             {
+                System.out.println( "Out of header." );
                 break;
             }
             else if ( headerStarted )
@@ -338,9 +349,12 @@ public class Page
                     final String value = line.substring( idx + 1 )
                                              .trim();
 
-                    if ( TITLE.equals( key ) )
+                    System.out.printf( "HEADER\n  Key: %s\n  Value: %s\n\n", key, value );
+                    if ( TITLE.name()
+                              .equalsIgnoreCase( key ) )
                     {
                         title = value;
+                        System.out.printf( "Got title: %s\n", title );
                         break;
                     }
                 }
@@ -399,6 +413,12 @@ public class Page
     public void setServerPath( final String serverPath )
     {
         this.serverPath = serverPath;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format( "Page [id=%s, title=%s, group=%s]", id, title, group );
     }
 
 }

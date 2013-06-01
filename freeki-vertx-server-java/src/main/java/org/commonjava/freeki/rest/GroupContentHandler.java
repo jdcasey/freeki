@@ -1,5 +1,6 @@
 package org.commonjava.freeki.rest;
 
+import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.freeki.infra.route.Method.DELETE;
 import static org.commonjava.freeki.infra.route.Method.GET;
 import static org.commonjava.freeki.infra.route.Method.HEAD;
@@ -11,7 +12,6 @@ import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,18 +21,18 @@ import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.infra.route.Method;
 import org.commonjava.freeki.infra.route.Route;
-import org.commonjava.freeki.model.Page;
+import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.store.FreekiStore;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.mimeparse.MIMEParse;
 import org.commonjava.util.logging.Logger;
 import org.vertx.java.core.http.HttpServerRequest;
 
-public class PageContentHandler
+public class GroupContentHandler
     implements Route
 {
 
-    private static final Set<String> PAGE_ACCEPT = new HashSet<String>()
+    private static final Set<String> DIR_ACCEPT = new HashSet<String>()
     {
         private static final long serialVersionUID = 1L;
 
@@ -52,11 +52,11 @@ public class PageContentHandler
 
     private final Logger logger = new Logger( getClass() );
 
-    public PageContentHandler()
+    public GroupContentHandler()
     {
     }
 
-    public PageContentHandler( final FreekiStore store, final RenderingEngine engine )
+    public GroupContentHandler( final FreekiStore store, final RenderingEngine engine )
     {
         this.store = store;
         this.engine = engine;
@@ -80,24 +80,18 @@ public class PageContentHandler
             dir = "/";
         }
 
-        final String page = req.params()
-                               .get( "page" );
+        System.out.printf( "Directory: %s\n", dir );
 
-        System.out.printf( "Page: %s\n", page );
-        System.out.printf( "Dir: %s\n", dir );
-
-        final String mimeAccept = MIMEParse.bestMatch( PAGE_ACCEPT, acceptHeader );
+        final String mimeAccept = MIMEParse.bestMatch( DIR_ACCEPT, acceptHeader );
         final ContentType type = ContentType.find( mimeAccept );
-
-        System.out.printf( "Accept header: %s\n", mimeAccept );
 
         try
         {
-            final Page pg = store.getPage( dir, page );
-            System.out.printf( "Got page: %s\n", pg );
-            final String rendered = engine.render( pg, type );
-
-            System.out.printf( "Rendered to:\n\n%s\n\n", rendered );
+            final Group group = store.getGroup( dir );
+            System.out.printf( "Got group with %d children:\n\n  %s\n\n", group.getChildren()
+                                                                               .size(),
+                               join( group.getChildren(), "\n  " ) );
+            final String rendered = engine.render( group, type );
 
             req.response()
                .write( rendered );
@@ -112,7 +106,7 @@ public class PageContentHandler
     @Override
     public Iterable<String> patterns()
     {
-        return Collections.singleton( ":?dir=(/.+)/:page" );
+        return Arrays.asList( "/:dir=(.+)/", "/" );
     }
 
     @Override
