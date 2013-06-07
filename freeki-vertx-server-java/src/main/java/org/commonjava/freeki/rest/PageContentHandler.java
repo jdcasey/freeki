@@ -1,17 +1,12 @@
 package org.commonjava.freeki.rest;
 
-import static org.commonjava.freeki.infra.route.Method.DELETE;
-import static org.commonjava.freeki.infra.route.Method.GET;
-import static org.commonjava.freeki.infra.route.Method.HEAD;
-import static org.commonjava.freeki.infra.route.Method.POST;
-import static org.commonjava.freeki.infra.route.Method.PUT;
+import static org.commonjava.freeki.rest.PathParameter.DIR;
+import static org.commonjava.freeki.rest.PathParameter.PAGE;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,16 +15,20 @@ import javax.inject.Inject;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.infra.route.Method;
-import org.commonjava.freeki.infra.route.Route;
+import org.commonjava.freeki.infra.route.RouteHandler;
+import org.commonjava.freeki.infra.route.anno.Route;
+import org.commonjava.freeki.infra.route.anno.Routes;
 import org.commonjava.freeki.model.Page;
 import org.commonjava.freeki.store.FreekiStore;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.mimeparse.MIMEParse;
 import org.commonjava.util.logging.Logger;
+import org.vertx.java.core.Handler;
+import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class PageContentHandler
-    implements Route
+    implements RouteHandler
 {
 
     private static final Set<String> PAGE_ACCEPT = new HashSet<String>()
@@ -62,8 +61,61 @@ public class PageContentHandler
         this.engine = engine;
     }
 
-    @Override
-    public void handle( final Method method, final HttpServerRequest req )
+    /* @formatter:off */
+    @Routes( {
+       @Route( path="/wiki/:dir=(.*)/:page", method=Method.PUT ),
+       @Route( path="/api/page/:page", method=Method.PUT ) 
+    } )
+    /* @formatter:on */
+    public void store( final HttpServerRequest req )
+        throws Exception
+    {
+        String dir = req.params()
+                        .get( DIR.param() );
+
+        final String page = req.params()
+                               .get( PAGE.param() );
+
+        if ( dir == null )
+        {
+            dir = "/";
+        }
+
+        System.out.printf( "Page: %s\n", page );
+        System.out.printf( "Dir: %s\n", dir );
+
+        final StringBuilder content = new StringBuilder();
+        req.bodyHandler( new Handler<Buffer>()
+        {
+            @Override
+            public void handle( final Buffer event )
+            {
+                content.append( new String( event.getBytes() ) );
+            }
+        } );
+
+        if ( store.storePage( new Page( dir, page, content.toString(), System.currentTimeMillis() ) ) )
+        {
+            req.response()
+               .setStatusCode( 201 )
+               .setStatusMessage( "Created: " + page );
+        }
+        else
+        {
+            req.response()
+               .setStatusCode( 200 )
+               .setStatusMessage( "Stored updates to: " + page );
+        }
+
+    }
+
+    /* @formatter:off */
+    @Routes( {
+       @Route( path="/wiki/:dir=(.*)/:page", method=Method.GET ),
+       @Route( path="/api/page/:page", method=Method.GET ) 
+    } )
+    /* @formatter:on */
+    public void get( final HttpServerRequest req )
         throws Exception
     {
         final String acceptHeader = req.headers()
@@ -74,14 +126,15 @@ public class PageContentHandler
            .setStatusCode( 200 );
 
         String dir = req.params()
-                        .get( "dir" );
+                        .get( DIR.param() );
+
+        final String page = req.params()
+                               .get( PAGE.param() );
+
         if ( dir == null )
         {
             dir = "/";
         }
-
-        final String page = req.params()
-                               .get( "page" );
 
         System.out.printf( "Page: %s\n", page );
         System.out.printf( "Dir: %s\n", dir );
@@ -107,18 +160,6 @@ public class PageContentHandler
             logger.error( "Failed to retrieve group: %s. Reason: %s", e, dir, e.getMessage() );
             throw e;
         }
-    }
-
-    @Override
-    public Iterable<String> patterns()
-    {
-        return Collections.singleton( ":?dir=(/.+)/:page" );
-    }
-
-    @Override
-    public Iterable<Method> methods()
-    {
-        return Arrays.asList( GET, POST, PUT, DELETE, HEAD );
     }
 
 }

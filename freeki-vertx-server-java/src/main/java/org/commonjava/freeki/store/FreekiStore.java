@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -147,14 +146,7 @@ public class FreekiStore
 
                 if ( file.isDirectory() )
                 {
-                    try
-                    {
-                        result.add( new ChildRef( ChildType.GROUP, name, Group.serverPathFor( name ) ) );
-                    }
-                    catch ( final MalformedURLException e )
-                    {
-                        logger.error( "Cannot read: '%s'. Reason: %s", e, file, e.getMessage() );
-                    }
+                    result.add( new ChildRef( ChildType.GROUP, name, name ) );
                 }
                 else
                 {
@@ -184,11 +176,9 @@ public class FreekiStore
         return result;
     }
 
-    public void storeGroup( final Group group )
+    public boolean storeGroup( final Group group )
         throws IOException
     {
-        group.repair();
-
         final File groupDir = getFile( group.getName(), null );
         if ( !groupDir.exists() )
         {
@@ -197,10 +187,13 @@ public class FreekiStore
             FileUtils.write( readme, README );
 
             addAndCommit( readme, "Adding new group: " + group.getName() );
+            return true;
         }
+
+        return false;
     }
 
-    public void storePage( final Page page )
+    public boolean storePage( final Page page )
         throws IOException
     {
         page.repair();
@@ -218,18 +211,20 @@ public class FreekiStore
         write( pageFile, page.render() );
         addAndCommit( pageFile, ( update ? "Updating" : "Creating" ) + " page: " + page.getTitle() + " in group: "
             + page.getGroup() );
+
+        return !update;
     }
 
     private File getFile( final String group, final String title )
     {
-        return getFileById( group, Page.idFor( title ) );
+        return getFileById( group, title == null ? null : Page.idFor( title ) );
     }
 
     private File getFileById( final String group, final String id )
     {
         final File root = config.getStorageDir();
         final File groupDir = new File( root, group );
-        return new File( groupDir, id + ".md" );
+        return id == null ? groupDir : new File( groupDir, id + ".md" );
     }
 
     public Page getPage( final String group, final String id )

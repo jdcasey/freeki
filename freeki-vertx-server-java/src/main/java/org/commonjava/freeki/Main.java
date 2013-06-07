@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 import org.commonjava.freeki.conf.FreekiConfig;
@@ -16,9 +17,10 @@ import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.json.JsonRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTHtmlRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTTextRenderer;
-import org.commonjava.freeki.infra.route.FreekiRouteMatcher;
+import org.commonjava.freeki.infra.route.ApplicationRouter;
+import org.commonjava.freeki.infra.route.RouteCollection;
+import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.rest.GroupContentHandler;
-import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
 import org.commonjava.freeki.store.FreekiStore;
 import org.commonjava.freeki.util.ContentType;
@@ -72,12 +74,23 @@ public class Main
         renderers.add( new JsonRenderer( new JsonSerializer() ) );
 
         final RenderingEngine engine = new RenderingEngine( renderers );
-        final FreekiRouteMatcher rm = new FreekiRouteMatcher().add( new GroupContentHandler( store, engine ) )
-                                                              .add( new PageContentHandler( store, engine ) )
-                                                              .noMatch( new OopsHandler( proc ) );
+
+        final Set<RouteHandler> handlers = new HashSet<RouteHandler>()
+        {
+            private static final long serialVersionUID = 1L;
+
+            {
+                add( new GroupContentHandler( store, engine ) );
+                add( new PageContentHandler( store, engine ) );
+            }
+        };
+
+        final ServiceLoader<RouteCollection> collections = ServiceLoader.load( RouteCollection.class );
+        final ApplicationRouter router = new ApplicationRouter( handlers, collections );
 
         final HttpServer http = vertx.createHttpServer();
-        http.requestHandler( rm )
+
+        http.requestHandler( router )
             .listen( 8080, "localhost" );
 
         System.out.println( "Listening for requests." );

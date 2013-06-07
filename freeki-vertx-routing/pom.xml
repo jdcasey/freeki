@@ -1,15 +1,19 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>org.commonjava.freeki</groupId>
-  <artifactId>freeki-vertx-server-java</artifactId>
+  <artifactId>freeki-vertx-routing</artifactId>
   <version>0.1-SNAPSHOT</version>
 
+  <name>Freeki Routing API for Vert.X</name>
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vertx.version>2.0.0-beta2</vertx.version>
     <vertx.testtools.version>2.0.0-beta1</vertx.testtools.version>
   </properties>
+  
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -99,11 +103,6 @@
       <version>2.3.4.Final</version><!--$NO-MVN-MAN-VER$-->
       <scope>compile</scope>
     </dependency>
-    <dependency>
-      <groupId>org.commonjava.freeki</groupId>
-      <artifactId>freeki-vertx-routing</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
   </dependencies>
   
   <build>
@@ -115,49 +114,10 @@
           <configuration>
             <source>1.7</source>
             <target>1.7</target>
-            
-            <proc>none</proc>
-<!-- 
-            <annotationProcessors>
-              <annotationProcessor>org.commonjava.freeki.infra.route.anno.proc.RoutingAnnotationProcessor</annotationProcessor>
-            </annotationProcessors>
- -->
           </configuration>
         </plugin>
-        <plugin> 
-          <groupId>org.bsc.maven</groupId> 
-          <artifactId>maven-processor-plugin</artifactId> 
-          <version>2.0.5</version> 
-          <executions> 
-            <execution> 
-              <id>process</id> 
-              <goals> 
-                <goal>process</goal> 
-              </goals> 
-              <phase>generate-sources</phase> 
-              <configuration>
-                <processors>
-                  <processor>org.commonjava.freeki.infra.route.anno.proc.RoutingAnnotationProcessor</processor>
-                </processors>
-              </configuration>
-            </execution>
-          </executions> 
-          <dependencies>
-            <dependency>
-              <groupId>org.commonjava.freeki</groupId>
-              <artifactId>freeki-vertx-routing</artifactId>
-              <version>0.1-SNAPSHOT</version>
-            </dependency>
-          </dependencies>
-        </plugin> 
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin> 
-        <groupId>org.bsc.maven</groupId> 
-        <artifactId>maven-processor-plugin</artifactId> 
-      </plugin>
-    </plugins>
   </build>
   <dependencyManagement>
     <dependencies>

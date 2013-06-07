@@ -14,10 +14,12 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.LineIterator;
-import org.commonjava.freeki.infra.render.anno.RenderKey;
+import org.commonjava.freeki.infra.anno.RenderKey;
 import org.commonjava.util.logging.Logger;
 
 @RenderKey( "page" )
@@ -50,6 +52,8 @@ public class Page
 
     private String group;
 
+    private final Map<String, String> metadata = new HashMap<>();
+
     public Page()
     {
     }
@@ -58,12 +62,11 @@ public class Page
         throws MalformedURLException
     {
         this.group = group;
-        this.content = content;
         this.updated = new Date( lastUpdated );
 
         System.out.printf( "Parsing page metadata for %s...", id );
-        parse();
-        System.out.println( "...done" );
+        this.content = parse( content );
+        System.out.printf( "...done. Content:\n\n'%s'\n\n", this.content );
     }
 
     public void repair()
@@ -218,7 +221,7 @@ public class Page
         return sb;
     }
 
-    private void parse()
+    private String parse( final String content )
         throws MalformedURLException
     {
         final String[] lines = content.split( Pattern.quote( "\n" ) );
@@ -228,6 +231,8 @@ public class Page
 
         for ( final String line : lines )
         {
+            headerSize++;
+
             if ( line.trim()
                      .startsWith( COMMENT_START ) )
             {
@@ -236,7 +241,6 @@ public class Page
             else if ( line.trim()
                           .endsWith( COMMENT_END ) )
             {
-                headerSize++;
                 break;
             }
             else if ( commentStarted )
@@ -254,7 +258,7 @@ public class Page
                     final MetadataKeys mk = metadataKey( key );
                     if ( mk == null )
                     {
-                        // TODO: freeform metadata...
+                        metadata.put( key, value );
                         continue;
                     }
 
@@ -290,15 +294,26 @@ public class Page
                     }
                 }
             }
-
-            headerSize++;
         }
 
         this.id = serverPathFor( group, title );
 
+        boolean contentStarted = false;
         final StringBuilder sb = new StringBuilder();
-        for ( int i = headerSize; i < lines.length; i++ )
+        for ( int i = headerSize + 1; i < lines.length; i++ )
         {
+            if ( !contentStarted )
+            {
+                if ( lines[i].isEmpty() )
+                {
+                    continue;
+                }
+                else
+                {
+                    contentStarted = true;
+                }
+            }
+
             if ( sb.length() > 0 )
             {
                 sb.append( "\n" );
@@ -307,7 +322,7 @@ public class Page
             sb.append( lines[i] );
         }
 
-        this.content = sb.toString();
+        return sb.toString();
     }
 
     public static String readTitle( final BufferedReader reader )

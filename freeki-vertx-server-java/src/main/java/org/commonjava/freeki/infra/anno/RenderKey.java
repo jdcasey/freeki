@@ -1,4 +1,4 @@
-package org.commonjava.freeki.infra.render.anno;
+package org.commonjava.freeki.infra.anno;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

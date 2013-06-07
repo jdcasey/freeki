@@ -1,17 +1,12 @@
 package org.commonjava.freeki.rest;
 
 import static org.apache.commons.lang.StringUtils.join;
-import static org.commonjava.freeki.infra.route.Method.DELETE;
-import static org.commonjava.freeki.infra.route.Method.GET;
-import static org.commonjava.freeki.infra.route.Method.HEAD;
-import static org.commonjava.freeki.infra.route.Method.POST;
-import static org.commonjava.freeki.infra.route.Method.PUT;
+import static org.commonjava.freeki.rest.PathParameter.DIR;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +15,9 @@ import javax.inject.Inject;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.infra.route.Method;
-import org.commonjava.freeki.infra.route.Route;
+import org.commonjava.freeki.infra.route.RouteHandler;
+import org.commonjava.freeki.infra.route.anno.Route;
+import org.commonjava.freeki.infra.route.anno.Routes;
 import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.store.FreekiStore;
 import org.commonjava.freeki.util.ContentType;
@@ -29,7 +26,7 @@ import org.commonjava.util.logging.Logger;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class GroupContentHandler
-    implements Route
+    implements RouteHandler
 {
 
     private static final Set<String> DIR_ACCEPT = new HashSet<String>()
@@ -62,8 +59,40 @@ public class GroupContentHandler
         this.engine = engine;
     }
 
-    @Override
-    public void handle( final Method method, final HttpServerRequest req )
+    /* @formatter:off */
+    @Routes( { 
+        @Route( path = "/api/group/:dir=(.+)/", method = Method.PUT ),
+        @Route( path = "/wiki/:dir=(.+)/", method = Method.PUT ), 
+    } )
+    /* @formatter:on */
+    public void post( final HttpServerRequest req )
+        throws Exception
+    {
+        final String dir = req.params()
+                              .get( DIR.param() );
+        if ( store.storeGroup( new Group( dir ) ) )
+        {
+            req.response()
+               .setStatusCode( 201 )
+               .setStatusMessage( "Created: " + dir );
+        }
+        else
+        {
+            req.response()
+               .setStatusCode( 400 )
+               .setStatusMessage( "Could not create: " + dir );
+        }
+    }
+
+    /* @formatter:off */
+    @Routes( {
+        @Route( path="/wiki/:dir=(.+)/", method=Method.GET ), 
+        @Route( path="/wiki/", method=Method.GET ), 
+        @Route( path="/wiki", method=Method.GET ), 
+        @Route( path="/api/group/:dir=(.+)/", method=Method.GET ),
+    } )
+    /* @formatter:on */
+    public void get( final HttpServerRequest req )
         throws Exception
     {
         final String acceptHeader = req.headers()
@@ -74,7 +103,7 @@ public class GroupContentHandler
            .setStatusCode( 200 );
 
         String dir = req.params()
-                        .get( "dir" );
+                        .get( DIR.param() );
         if ( dir == null )
         {
             dir = "/";
@@ -101,18 +130,6 @@ public class GroupContentHandler
             logger.error( "Failed to retrieve group: %s. Reason: %s", e, dir, e.getMessage() );
             throw e;
         }
-    }
-
-    @Override
-    public Iterable<String> patterns()
-    {
-        return Arrays.asList( "/:dir=(.+)/", "/" );
-    }
-
-    @Override
-    public Iterable<Method> methods()
-    {
-        return Arrays.asList( GET, POST, PUT, DELETE, HEAD );
     }
 
 }

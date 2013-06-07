@@ -1,21 +1,16 @@
 package org.commonjava.freeki.model;
 
-import static org.commonjava.freeki.util.UrlUtils.buildUrl;
-
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.commonjava.freeki.infra.render.anno.RenderKey;
+import org.commonjava.freeki.infra.anno.RenderKey;
 
 @RenderKey( "group" )
 public class Group
     implements Comparable<Group>
 {
-
-    private String serverPath;
 
     private String name;
 
@@ -25,24 +20,15 @@ public class Group
     {
     }
 
-    public Group( final String name, final Collection<ChildRef> children )
-        throws MalformedURLException
+    public Group( final String name )
     {
-        this.serverPath = serverPathFor( name );
-        this.children = new TreeSet<ChildRef>( children );
         this.name = name;
     }
 
-    public void repair()
-        throws MalformedURLException
+    public Group( final String name, final Collection<ChildRef> children )
     {
-        this.serverPath = serverPathFor( name );
-    }
-
-    public static String serverPathFor( final String name )
-        throws MalformedURLException
-    {
-        return buildUrl( false, "/groups", name );
+        this.children = new TreeSet<ChildRef>( children );
+        this.name = name;
     }
 
     public String getName()
@@ -86,16 +72,6 @@ public class Group
         return n;
     }
 
-    public String getServerPath()
-    {
-        return serverPath;
-    }
-
-    public void setServerPath( final String serverPath )
-    {
-        this.serverPath = serverPath;
-    }
-
     public void setChildren( final SortedSet<ChildRef> children )
     {
         this.children = children;
@@ -104,7 +80,7 @@ public class Group
     @Override
     public String toString()
     {
-        return String.format( "Group [serverPath=%s, name=%s]", serverPath, name );
+        return String.format( "Group [%s]", name );
     }
 
 }

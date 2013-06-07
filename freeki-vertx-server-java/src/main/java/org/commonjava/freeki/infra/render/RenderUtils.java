@@ -1,6 +1,6 @@
 package org.commonjava.freeki.infra.render;
 
-import org.commonjava.freeki.infra.render.anno.RenderKey;
+import org.commonjava.freeki.infra.anno.RenderKey;
 
 public final class RenderUtils
 {

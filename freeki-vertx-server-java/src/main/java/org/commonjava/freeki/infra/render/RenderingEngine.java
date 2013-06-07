@@ -8,12 +8,9 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.commonjava.freeki.util.ContentType;
-import org.commonjava.util.logging.Logger;
 
 public class RenderingEngine
 {
-
-    private final Logger logger = new Logger( getClass() );
 
     private final Map<ContentType, ContentRenderer> renderers = new HashMap<>();
 
