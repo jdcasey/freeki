@@ -2,7 +2,6 @@ package org.commonjava.freeki;
 
 import groovy.text.GStringTemplateEngine;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,14 +56,14 @@ public class Main
     public void run()
         throws IOException
     {
-        final FreekiConfig mainConf = new FreekiConfig( new File( System.getProperty( "user.home" ), "freeki" ) );
+        final FreekiConfig mainConf = new FreekiConfig();
         final FreekiStore store = new FreekiStore( mainConf );
 
         final Map<String, String> rawTemplateConf = new HashMap<>();
-        rawTemplateConf.put( "group@" + ContentType.TEXT_HTML.value(), "groovy/group.groovy" );
-        rawTemplateConf.put( "page@" + ContentType.TEXT_HTML.value(), "groovy/page.groovy" );
-        rawTemplateConf.put( "group@" + ContentType.TEXT_PLAIN.value(), "groovy/group.groovy" );
-        rawTemplateConf.put( "page@" + ContentType.TEXT_PLAIN.value(), "groovy/page.groovy" );
+        rawTemplateConf.put( "group@" + ContentType.TEXT_HTML.value(), "groovy/html/group.groovy" );
+        rawTemplateConf.put( "page@" + ContentType.TEXT_HTML.value(), "groovy/html/page.groovy" );
+        rawTemplateConf.put( "group@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/group.groovy" );
+        rawTemplateConf.put( "page@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/page.groovy" );
 
         final GTemplateConfig templateConfig = new GTemplateConfig( rawTemplateConf );
 

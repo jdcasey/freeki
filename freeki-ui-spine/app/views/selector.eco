@@ -1,9 +1,0 @@
-<header>
-  <input type="search" placeholder="search" results="0" incremental="true" autofocus>
-</header>
-
-<div class="selectorItems"></div>
-
-<footer>
-  <button>New Group</button>
-</footer>

@@ -61,15 +61,21 @@ public class GroupContentHandler
 
     /* @formatter:off */
     @Routes( { 
-        @Route( path = "/api/group/:dir=(.+)/", method = Method.PUT ),
+        @Route( path = "/api/group/:dir=(.+)", method = Method.PUT ),
         @Route( path = "/wiki/:dir=(.+)/", method = Method.PUT ), 
     } )
     /* @formatter:on */
-    public void post( final HttpServerRequest req )
+    public void store( final HttpServerRequest req )
         throws Exception
     {
-        final String dir = req.params()
-                              .get( DIR.param() );
+        String dir = req.params()
+                        .get( DIR.param() );
+
+        if ( dir.endsWith( "/" ) )
+        {
+            dir = dir.substring( 0, dir.length() - 1 );
+        }
+
         if ( store.storeGroup( new Group( dir ) ) )
         {
             req.response()
@@ -89,7 +95,7 @@ public class GroupContentHandler
         @Route( path="/wiki/:dir=(.+)/", method=Method.GET ), 
         @Route( path="/wiki/", method=Method.GET ), 
         @Route( path="/wiki", method=Method.GET ), 
-        @Route( path="/api/group/:dir=(.+)/", method=Method.GET ),
+        @Route( path="/api/group/:dir=(.+)", method=Method.GET ),
     } )
     /* @formatter:on */
     public void get( final HttpServerRequest req )
@@ -104,9 +110,14 @@ public class GroupContentHandler
 
         String dir = req.params()
                         .get( DIR.param() );
+
         if ( dir == null )
         {
             dir = "/";
+        }
+        else if ( dir.endsWith( "/" ) )
+        {
+            dir = dir.substring( 0, dir.length() - 1 );
         }
 
         System.out.printf( "Directory: %s\n", dir );

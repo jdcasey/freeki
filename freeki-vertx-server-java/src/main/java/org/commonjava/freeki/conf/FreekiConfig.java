@@ -29,7 +29,12 @@ public class FreekiConfig
 
     private static final File DEFAULT_STORAGE_DIR = new File( System.getProperty( "user.home" ), "freeki" );
 
+    private static final File DEFAULT_ATTACHMENTS_DIR = new File( System.getProperty( "user.home" ),
+                                                                  "freeki-attachments" );
+
     private File storageDir;
+
+    private File attachmentsDir;
 
     @Inject
     private Instance<FreekiConfigSection> sections;
@@ -40,7 +45,13 @@ public class FreekiConfig
 
     public FreekiConfig( final File storageDir )
     {
+        this( storageDir, null );
+    }
+
+    public FreekiConfig( final File storageDir, final File attachmentsDir )
+    {
         this.storageDir = storageDir;
+        this.attachmentsDir = attachmentsDir;
     }
 
     @PostConstruct
@@ -81,6 +92,17 @@ public class FreekiConfig
     public void setStorageDir( final File storageDir )
     {
         this.storageDir = storageDir;
+    }
+
+    public File getAttachmentsDir()
+    {
+        return attachmentsDir == null ? DEFAULT_ATTACHMENTS_DIR : attachmentsDir;
+    }
+
+    @ConfigName( "attachments.dir" )
+    public void setAttachmentsDir( final File attachmentsDir )
+    {
+        this.attachmentsDir = attachmentsDir;
     }
 
 }

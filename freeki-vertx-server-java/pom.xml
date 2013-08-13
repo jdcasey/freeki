@@ -7,8 +7,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <vertx.version>2.0.0-beta2</vertx.version>
-    <vertx.testtools.version>2.0.0-beta1</vertx.testtools.version>
+    <vertx.version>2.0.0-final</vertx.version>
+    <vertx.testtools.version>2.0.0-final</vertx.testtools.version>
   </properties>
   <dependencies>
     <dependency>
@@ -129,13 +129,14 @@
           <artifactId>maven-processor-plugin</artifactId> 
           <version>2.0.5</version> 
           <executions> 
-            <execution> 
+            <execution>
               <id>process</id> 
               <goals> 
                 <goal>process</goal> 
               </goals> 
               <phase>generate-sources</phase> 
               <configuration>
+                <outputDirectory>${project.build.directory}/generated-sources/routing</outputDirectory>
                 <processors>
                   <processor>org.commonjava.freeki.infra.route.anno.proc.RoutingAnnotationProcessor</processor>
                 </processors>

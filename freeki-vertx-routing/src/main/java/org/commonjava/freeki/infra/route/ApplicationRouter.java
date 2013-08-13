@@ -195,6 +195,7 @@ public class ApplicationRouter
         final Method method = handler.getMethod();
         final String path = handler.getPath();
 
+        // FIXME: Sort these to push the most specific paths to the top.
         List<PatternBinding> b = bindings.get( method );
         if ( b == null )
         {
