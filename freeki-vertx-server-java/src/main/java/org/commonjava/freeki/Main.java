@@ -21,6 +21,7 @@ import org.commonjava.freeki.infra.route.RouteCollection;
 import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.rest.GroupContentHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
+import org.commonjava.freeki.rest.StaticContentHandler;
 import org.commonjava.freeki.store.FreekiStore;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.web.json.ser.JsonSerializer;
@@ -81,6 +82,7 @@ public class Main
             {
                 add( new GroupContentHandler( store, engine ) );
                 add( new PageContentHandler( store, engine ) );
+                add( new StaticContentHandler( mainConf ) );
             }
         };
 

@@ -25,19 +25,20 @@ public class FreekiConfig
 
     private static final String CONFIG_FILE_PROPERTY = "freeki.conf";
 
-    private static final File DEFAULT_CONFIG_FILE = new File( System.getProperty( "user.home" ), "freeki.conf" );
+    private static final String USER_HOME = System.getProperty( "user.home" );
 
-    private static final File DEFAULT_STORAGE_DIR = new File( System.getProperty( "user.home" ), "freeki" );
+    private static final File DEFAULT_CONFIG_FILE = new File( USER_HOME, ".freeki.conf" );
 
-    private static final File DEFAULT_ATTACHMENTS_DIR = new File( System.getProperty( "user.home" ),
-                                                                  "freeki-attachments" );
+    private static final File DEFAULT_STORAGE_DIR = new File( USER_HOME, "freeki" );
+
+    private static final File DEFAULT_STATIC_DIR = new File( USER_HOME, "freeki/.static" );
 
     private File storageDir;
 
-    private File attachmentsDir;
-
     @Inject
     private Instance<FreekiConfigSection> sections;
+
+    private File staticDir;
 
     public FreekiConfig()
     {
@@ -48,10 +49,10 @@ public class FreekiConfig
         this( storageDir, null );
     }
 
-    public FreekiConfig( final File storageDir, final File attachmentsDir )
+    public FreekiConfig( final File storageDir, final File staticDir )
     {
         this.storageDir = storageDir;
-        this.attachmentsDir = attachmentsDir;
+        this.staticDir = staticDir;
     }
 
     @PostConstruct
@@ -94,15 +95,15 @@ public class FreekiConfig
         this.storageDir = storageDir;
     }
 
-    public File getAttachmentsDir()
+    public File getStaticDir()
     {
-        return attachmentsDir == null ? DEFAULT_ATTACHMENTS_DIR : attachmentsDir;
+        return staticDir == null ? DEFAULT_STATIC_DIR : staticDir;
     }
 
-    @ConfigName( "attachments.dir" )
-    public void setAttachmentsDir( final File attachmentsDir )
+    @ConfigName( "static.dir" )
+    public void setStaticDir( final File staticDir )
     {
-        this.attachmentsDir = attachmentsDir;
+        this.staticDir = staticDir;
     }
 
 }

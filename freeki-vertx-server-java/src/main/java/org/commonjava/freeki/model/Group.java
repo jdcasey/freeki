@@ -7,7 +7,7 @@ import java.util.TreeSet;
 
 import org.commonjava.freeki.infra.anno.RenderKey;
 
-@RenderKey( "group" )
+@RenderKey( key = "group", contentTemplate = "${data.name}" )
 public class Group
     implements Comparable<Group>
 {

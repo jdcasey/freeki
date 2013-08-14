@@ -22,7 +22,7 @@ import org.apache.commons.io.LineIterator;
 import org.commonjava.freeki.infra.anno.RenderKey;
 import org.commonjava.util.logging.Logger;
 
-@RenderKey( "page" )
+@RenderKey( key = "page", contentTemplate = "${data.content}" )
 public class Page
 {
 

@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.commonjava.util.logging.Logger;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 
@@ -35,6 +36,8 @@ public class ApplicationRouter
     }
 
     private static final String PATH_SEG_PATTERN = "([^\\/]+)";
+
+    private final Logger logger = new Logger( getClass() );
 
     private final Map<Method, List<PatternBinding>> bindings = new HashMap<>();
 
@@ -93,12 +96,12 @@ public class ApplicationRouter
         {
             final Method method = Method.valueOf( request.method() );
 
-            System.out.printf( "REQUEST %s %s\n", method, request.path() );
+            logger.info( "REQUEST>>> %s %s\n", method, request.path() );
 
             final BindingContext ctx = findBinding( method, request.path() );
             if ( ctx != null )
             {
-                System.out.printf( "MATCH: %s\n", ctx.binding.handler );
+                logger.info( "MATCH: %s\n", ctx.binding.handler );
                 parseParams( ctx, request );
 
                 ctx.binding.handler.handle( this, request );
@@ -118,7 +121,7 @@ public class ApplicationRouter
         }
         catch ( final Throwable t )
         {
-            System.out.printf( "ERROR: %s", t.getMessage() );
+            logger.info( "ERROR: %s", t.getMessage() );
             t.printStackTrace();
             request.response()
                    .setStatusCode( 500 )
@@ -161,7 +164,7 @@ public class ApplicationRouter
             }
         }
 
-        System.out.printf( "PARAMS: %s\n", params );
+        logger.info( "PARAMS: %s\n", params );
         request.params()
                .set( params );
     }
@@ -169,7 +172,7 @@ public class ApplicationRouter
     protected BindingContext findBinding( final Method method, final String path )
     {
         final List<PatternBinding> bindings = this.bindings.get( method );
-        System.out.printf( "Available bindings:\n  %s\n", join( bindings, "\n  " ) );
+        logger.info( "Available bindings:\n  %s\n", join( bindings, "\n  " ) );
         if ( bindings != null )
         {
             for ( final PatternBinding binding : bindings )
@@ -203,7 +206,7 @@ public class ApplicationRouter
             bindings.put( method, b );
         }
 
-        System.out.printf( "ADD Method: %s, Pattern: %s, Route: %s\n", method, path, handler );
+        logger.info( "ADD Method: %s, Pattern: %s, Route: %s\n", method, path, handler );
         addPattern( path, handler, b );
     }
 
@@ -266,7 +269,7 @@ public class ApplicationRouter
         m.appendTail( sb );
         final String regex = sb.toString();
 
-        System.out.printf( "BIND regex: %s, groups: %s, route: %s\n", regex, groups, handler );
+        logger.info( "BIND regex: %s, groups: %s, route: %s\n", regex, groups, handler );
 
         final PatternBinding binding = new PatternBinding( Pattern.compile( regex ), groups, handler );
         bindings.add( binding );

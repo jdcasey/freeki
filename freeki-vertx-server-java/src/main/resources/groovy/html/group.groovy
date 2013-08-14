@@ -14,14 +14,16 @@ if ( path.length > 0 ){
 <body>
 <header id="header"></header>
 <div id="breadcrumbs">
-<% if(!data.name.equals("/")){ %>[Wiki Root](${last}) /<% path.each { last = last + it + '/' %> [${it}](${last}) /<% }} %>
+<% if(!data.name.equals("/")){ %><a href="${last}">Wiki Root</a> /<% path.each { last = last + it + '/' %> <a href="${last}">${it}</a> /<% }} %>
 </div>
 
-# <% if (me == 'Wiki Root') { %>Wiki Root<% }else{ %>${data.name}<% } %>
+<h1><% if (me == 'Wiki Root') { %>Wiki Root<% }else{ %>${data.name}<% } %></h1>
 
-<% if ( data.children ){ %> 
+<% if ( data.children ){ %>
+<ul>
 <% data.children.each { %>
-  - **[${it.label}](${it.id}<% if (it.type.name().equals("GROUP")) { %>/<% } %>)**<% } %>
+  <li><a href="${it.id}<% if (it.type.name().equals("GROUP")) { %>/<% } %>">${it.label}<% if (it.type.name().equals("GROUP")) { %>/<% } %></a><% } %></li>
+</ul>
 <% } %>
 
 <footer><span style="font-size: small; float: center;">

@@ -9,5 +9,7 @@ import java.lang.annotation.Target;
 @Retention( RetentionPolicy.RUNTIME )
 public @interface RenderKey
 {
-    String value();
+    String key();
+
+    String contentTemplate();
 }

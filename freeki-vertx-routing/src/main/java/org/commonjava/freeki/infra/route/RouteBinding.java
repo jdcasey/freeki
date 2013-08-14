@@ -25,6 +25,12 @@ public abstract class RouteBinding
         return method;
     }
 
+    @Override
+    public String toString()
+    {
+        return "Route [" + method.name() + " " + path + "]";
+    }
+
     public abstract void handle( ApplicationRouter router, HttpServerRequest req )
         throws Exception;
 

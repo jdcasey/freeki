@@ -3,7 +3,7 @@ package org.commonjava.freeki.rest;
 public enum PathParameter
 {
 
-    DIR, PAGE;
+    DIR, PAGE, PATH;
 
     public String param()
     {
