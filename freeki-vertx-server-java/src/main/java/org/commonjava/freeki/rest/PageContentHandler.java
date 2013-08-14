@@ -63,8 +63,7 @@ public class PageContentHandler
 
     /* @formatter:off */
     @Routes( {
-       @Route( path="/wiki/:dir=(.*)/:page", method=Method.PUT ),
-       @Route( path="/api/page/:page", method=Method.PUT ) 
+       @Route( path="/api/page/:dir=(.*)/:page", method=Method.PUT, contentType="application/json" ) 
     } )
     /* @formatter:on */
     public void store( final HttpServerRequest req )
@@ -112,7 +111,7 @@ public class PageContentHandler
     /* @formatter:off */
     @Routes( {
        @Route( path="/wiki/:dir=(.*)/:page", method=Method.GET ),
-       @Route( path="/api/page/:page", method=Method.GET ) 
+       @Route( path="/api/page/:dir=(.*)/:page", method=Method.GET, contentType="application/json" ) 
     } )
     /* @formatter:on */
     public void get( final HttpServerRequest req )

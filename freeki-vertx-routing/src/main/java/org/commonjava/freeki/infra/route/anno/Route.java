@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 import org.commonjava.freeki.infra.route.Method;
 
-
 @Target( ElementType.METHOD )
 @Retention( RetentionPolicy.RUNTIME )
 public @interface Route
@@ -16,5 +15,7 @@ public @interface Route
     String path();
 
     Method method();
+
+    String contentType() default "";
 
 }
