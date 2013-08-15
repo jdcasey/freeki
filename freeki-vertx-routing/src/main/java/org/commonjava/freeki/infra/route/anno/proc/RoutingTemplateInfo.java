@@ -23,8 +23,10 @@ public final class RoutingTemplateInfo
 
     private final String httpPath;
 
+    private final String httpContentType;
+
     public RoutingTemplateInfo( final String packagename, final String qualifiedClassname, final String classname,
-                        final String methodname, final Route route )
+                                final String methodname, final Route route )
     {
         this.packagename = packagename;
         this.qualifiedClassname = qualifiedClassname;
@@ -32,12 +34,14 @@ public final class RoutingTemplateInfo
         this.methodname = methodname;
         this.httpMethod = route.method();
         this.httpPath = route.path();
+        this.httpContentType = route.contentType();
     }
 
     public RoutingTemplateInfo( final Element elem, final Route route )
     {
         this.httpMethod = route.method();
         this.httpPath = route.path();
+        this.httpContentType = route.contentType();
         // it only applies to methods...
         final ExecutableElement eelem = (ExecutableElement) elem;
 
@@ -83,6 +87,11 @@ public final class RoutingTemplateInfo
     public String getHttpPath()
     {
         return httpPath;
+    }
+
+    public String getHttpContentType()
+    {
+        return httpContentType;
     }
 
 }

@@ -175,12 +175,12 @@ public class RoutingAnnotationProcessor
         }
 
         final String resName = "META-INF/services/" + RouteCollection.class.getName();
-        System.out.printf( "Generating routes class service entry for: %s in: %s\n", clsName, resName );
 
         Writer svcWriter = null;
         try
         {
             final FileObject file = filer.createResource( StandardLocation.CLASS_OUTPUT, "", resName, (Element[]) null );
+            System.out.printf( "Generating routes class service entry for: %s in: %s\n", clsName, file.toUri() );
             svcWriter = file.openWriter();
             svcWriter.write( clsName );
         }

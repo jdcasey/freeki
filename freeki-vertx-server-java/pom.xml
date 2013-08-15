@@ -112,19 +112,26 @@
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.1</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.commonjava.freeki</groupId>
+              <artifactId>freeki-vertx-routing</artifactId>
+              <version>0.1-SNAPSHOT</version>
+            </dependency>
+          </dependencies>
           <configuration>
             <source>1.7</source>
             <target>1.7</target>
             
-            <proc>none</proc>
-<!-- 
+            <!-- <proc>none</proc> -->
+
             <annotationProcessors>
               <annotationProcessor>org.commonjava.freeki.infra.route.anno.proc.RoutingAnnotationProcessor</annotationProcessor>
             </annotationProcessors>
- -->
+
           </configuration>
         </plugin>
-        <plugin> 
+        <!-- <plugin> 
           <groupId>org.bsc.maven</groupId> 
           <artifactId>maven-processor-plugin</artifactId> 
           <version>2.0.5</version> 
@@ -150,7 +157,7 @@
               <version>0.1-SNAPSHOT</version>
             </dependency>
           </dependencies>
-        </plugin> 
+        </plugin>  -->
 
 <!--         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -179,12 +186,12 @@
  -->
        </plugins>
     </pluginManagement>
-    <plugins>
+    <!-- <plugins>
       <plugin> 
         <groupId>org.bsc.maven</groupId> 
         <artifactId>maven-processor-plugin</artifactId> 
       </plugin>
-    </plugins>
+    </plugins> -->
   </build>
   <dependencyManagement>
     <dependencies>

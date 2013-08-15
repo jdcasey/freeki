@@ -69,6 +69,20 @@ public class Page
         System.out.printf( "...done. Content:\n\n'%s'\n\n", this.content );
     }
 
+    public Page( final String group, final String id, final String content, final String title, final long created,
+                 final String author )
+        throws MalformedURLException
+    {
+        this.group = group;
+        this.updated = new Date( created );
+        this.created = new Date( created );
+        this.content = content;
+        this.title = title;
+        this.currentAuthor = author;
+        this.id = id;
+        this.serverPath = serverPathFor( group, id );
+    }
+
     public void repair()
         throws MalformedURLException
     {

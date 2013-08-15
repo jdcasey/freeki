@@ -9,12 +9,12 @@
     <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
     
     <link rel="stylesheet" href="/static/css/jquery-ui-1.10.3.custom.css">
+    <link rel="stylesheet" href="/static/css/pagedown.css">
   </head>
   <body>
 <% def last = '/wiki/' %>
 <a href="${last}">Wiki Root</a> /<% data.group.split('/').each { last = last + it + '/' %> <a href="${last}">${it}</a> /<% } %>
 <div id="page-content">
-${rendered}
 </div>
 <div id="buttonbar-edit-page">
 <button id="edit-page">Edit</button>
@@ -23,7 +23,7 @@ ${rendered}
   <div class="wmd-panel">
     <div id="wmd-button-bar"></div>
     <textarea class="wmd-input" id="wmd-input">
-# This is a test.
+${data.content}
 </textarea>
   </div>
   <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
@@ -33,21 +33,10 @@ ${rendered}
   <span style="font-size: small; float: center;">
     Created on ${data.created}. Last updated: ${data.updated} by ${data.currentAuthor}.
   </span>
+  <script type="text/javascript" src="/static/js/page.js"></script>
   <script>
-    var converter = new Markdown.Converter();
-    var editor = new Markdown.Editor(converter);
-    editor.run();
-    
-    \$('#edit-page').click(function(){
-      \$('#page-content').hide();
-      \$('#buttonbar-edit-page').hide();
-      \$('#page-edit').show();
-    });
-    
-    \$('#cancel-edit').click(function(){
-      \$('#page-edit').hide();
-      \$('#page-content').show();
-      \$('#buttonbar-edit-page').show();
+    \$(document).ready(function(){
+      init('/api/page/${data.id}');
     });
   </script>
 </body>

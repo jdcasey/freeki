@@ -15,9 +15,9 @@ public final class Routes
 
     public Routes()
     {<% routes.each { %>
-        bind( new RouteBinding( "${it.httpPath}", Method.${it.httpMethod} )
+        bind( new RouteBinding( "${it.httpPath}", Method.${it.httpMethod}, "${it.httpContentType}" )
         {
-            public void handle( ApplicationRouter router, HttpServerRequest req )
+            public void dispatch( ApplicationRouter router, HttpServerRequest req )
                 throws Exception
             {
                 ${it.qualifiedClassname} handler = router.getResourceInstance( ${it.qualifiedClassname}.class );
@@ -28,7 +28,7 @@ public final class Routes
                 }
                 else
                 {
-                    throw new RuntimeException( "Cannot retrieve handler instance for: " + ${it.httpPath} + " using method: " + ${it.httpMethod.name()} );
+                    throw new RuntimeException( "Cannot retrieve handler instance for: '${it.httpPath}' using method: '${it.httpMethod.name()}'" );
                 } 
             }
         } );<% } %>

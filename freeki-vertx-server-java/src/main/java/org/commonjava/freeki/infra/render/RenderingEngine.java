@@ -58,7 +58,7 @@ public class RenderingEngine
             return renderer.render( data );
         }
 
-        throw new RenderingException( "Cannot find renderer for content type: %s", type.value() );
+        throw new RenderingException( "Cannot find renderer for content type: %s", type );
     }
 
 }

@@ -6,7 +6,10 @@ import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,6 +18,7 @@ import javax.inject.Inject;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.infra.route.Method;
+import org.commonjava.freeki.infra.route.RouteBinding;
 import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.infra.route.anno.Route;
 import org.commonjava.freeki.infra.route.anno.Routes;
@@ -63,7 +67,8 @@ public class PageContentHandler
 
     /* @formatter:off */
     @Routes( {
-       @Route( path="/api/page/:dir=(.*)/:page", method=Method.PUT, contentType="application/json" ) 
+       @Route( path="/api/page/:dir=(.*)/:page", method=Method.PUT, contentType="text/plain" ), 
+       @Route( path="/api/page/:dir=(.*)/:page", method=Method.POST, contentType="text/plain" ) 
     } )
     /* @formatter:on */
     public void store( final HttpServerRequest req )
@@ -80,45 +85,89 @@ public class PageContentHandler
             dir = "/";
         }
 
-        System.out.printf( "Page: %s\n", page );
-        System.out.printf( "Dir: %s\n", dir );
+        logger.info( "Page: %s\n", page );
+        logger.info( "Dir: %s\n", dir );
 
-        final StringBuilder content = new StringBuilder();
+        final String group = dir;
+
         req.bodyHandler( new Handler<Buffer>()
         {
             @Override
             public void handle( final Buffer event )
             {
-                content.append( new String( event.getBytes() ) );
+                final String content = event.getString( 0, event.length() );
+                logger.info( "Received content:\n\n%s\n\n", content );
+
+                String title = page;
+
+                try
+                {
+                    final BufferedReader reader = new BufferedReader( new StringReader( content.toString() ) );
+                    final String firstLine = reader.readLine();
+                    if ( firstLine != null && firstLine.length() > 0 )
+                    {
+                        if ( firstLine.startsWith( "# " ) )
+                        {
+                            title = firstLine.substring( 2 );
+                        }
+                        else
+                        {
+                            final String secondLine = reader.readLine();
+                            if ( secondLine != null && secondLine.matches( "[=]+" ) )
+                            {
+                                title = firstLine;
+                            }
+                        }
+                    }
+
+                    logger.info( "Using title: %s", title );
+
+                    Page pageObj = store.getPage( group, page );
+                    if ( pageObj == null )
+                    {
+                        pageObj = new Page( group, page, content, title, System.currentTimeMillis(), "unknown" );
+                    }
+                    else
+                    {
+                        logger.info( "Setting content:\n\n%s\n\n", content );
+                        pageObj.setContent( content );
+                        pageObj.setUpdated( new Date() );
+                        if ( pageObj.getTitle() == null )
+                        {
+                            pageObj.setTitle( title );
+                        }
+                    }
+
+                    if ( store.storePage( pageObj ) )
+                    {
+                        req.response()
+                           .setStatusCode( 201 )
+                           .setStatusMessage( "Created: " + page );
+                    }
+                    else
+                    {
+                        req.response()
+                           .setStatusCode( 200 )
+                           .setStatusMessage( "Stored updates to: " + page );
+                    }
+                }
+                catch ( final Exception e )
+                {
+                    logger.error( e.getMessage(), e );
+                }
             }
         } );
-
-        if ( store.storePage( new Page( dir, page, content.toString(), System.currentTimeMillis() ) ) )
-        {
-            req.response()
-               .setStatusCode( 201 )
-               .setStatusMessage( "Created: " + page );
-        }
-        else
-        {
-            req.response()
-               .setStatusCode( 200 )
-               .setStatusMessage( "Stored updates to: " + page );
-        }
-
     }
 
     /* @formatter:off */
     @Routes( {
        @Route( path="/wiki/:dir=(.*)/:page", method=Method.GET ),
-       @Route( path="/api/page/:dir=(.*)/:page", method=Method.GET, contentType="application/json" ) 
+       @Route( path="/api/page/:dir=(.*)/:page", method=Method.GET, contentType="text/plain" ) 
     } )
     /* @formatter:on */
     public void get( final HttpServerRequest req )
         throws Exception
     {
-        final String acceptHeader = req.headers()
-                                       .get( "Accept" );
         req.response()
            .setChunked( true );
         req.response()
@@ -135,21 +184,32 @@ public class PageContentHandler
             dir = "/";
         }
 
-        System.out.printf( "Page: %s\n", page );
-        System.out.printf( "Dir: %s\n", dir );
+        logger.info( "Page: %s\n", page );
+        logger.info( "Dir: %s\n", dir );
 
-        final String mimeAccept = MIMEParse.bestMatch( PAGE_ACCEPT, acceptHeader );
+        String mimeAccept = req.headers()
+                               .get( RouteBinding.RECOMMENDED_CONTENT_TYPE );
+        logger.info( "Recommended content type: %s", mimeAccept );
+
+        if ( mimeAccept == null )
+        {
+            final String acceptHeader = req.headers()
+                                           .get( "Accept" );
+
+            mimeAccept = MIMEParse.bestMatch( PAGE_ACCEPT, acceptHeader );
+        }
+
         final ContentType type = ContentType.find( mimeAccept );
 
-        System.out.printf( "Accept header: %s\n", mimeAccept );
+        logger.info( "Using content type: %s\n", type );
 
         try
         {
             final Page pg = store.getPage( dir, page );
-            System.out.printf( "Got page: %s\n", pg );
+            logger.info( "Got page: %s\n", pg );
             final String rendered = engine.render( pg, type );
 
-            System.out.printf( "Rendered to:\n\n%s\n\n", rendered );
+            logger.info( "Rendered to:\n\n%s\n\n", rendered );
 
             req.response()
                .write( rendered );
@@ -159,6 +219,11 @@ public class PageContentHandler
             logger.error( "Failed to retrieve group: %s. Reason: %s", e, dir, e.getMessage() );
             throw e;
         }
+    }
+
+    private static final class BooleanHolder
+    {
+        private final boolean done = false;
     }
 
 }
