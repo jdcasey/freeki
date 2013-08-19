@@ -100,7 +100,7 @@
           <dependencies>
             <dependency>
               <groupId>org.commonjava.freeki</groupId>
-              <artifactId>freeki-vertx-routing</artifactId>
+              <artifactId>freeki-vertx-routing-api</artifactId>
               <version>${project.version}</version>
             </dependency>
           </dependencies>
