@@ -38,8 +38,6 @@ public class Page
 
     private String id;
 
-    private String serverPath;
-
     private String title;
 
     private Date created = new Date();
@@ -63,10 +61,11 @@ public class Page
     {
         this.group = group;
         this.updated = new Date( lastUpdated );
+        this.id = serverPathFor( group, id );
 
-        System.out.printf( "Parsing page metadata for %s...", id );
+        //        System.out.printf( "Parsing page metadata for %s...", id );
         this.content = parse( content );
-        System.out.printf( "...done. Content:\n\n'%s'\n\n", this.content );
+        //        System.out.printf( "...done. Content:\n\n'%s'\n\n", this.content );
     }
 
     public Page( final String group, final String id, final String content, final String title, final long created,
@@ -80,14 +79,12 @@ public class Page
         this.title = title;
         this.currentAuthor = author;
         this.id = id;
-        this.serverPath = serverPathFor( group, id );
     }
 
     public void repair()
         throws MalformedURLException
     {
-        this.id = idFor( title );
-        this.serverPath = serverPathFor( group, title );
+        this.id = serverPathFor( group, title );
     }
 
     public String getContent()
@@ -310,7 +307,11 @@ public class Page
             }
         }
 
-        this.id = serverPathFor( group, title );
+        final String parsedId = serverPathFor( group, title );
+        if ( parsedId != null )
+        {
+            id = parsedId;
+        }
 
         boolean contentStarted = false;
         final StringBuilder sb = new StringBuilder();
@@ -342,7 +343,7 @@ public class Page
     public static String readTitle( final BufferedReader reader )
         throws IOException
     {
-        System.out.println( "Looking for title in markdown header." );
+        //        System.out.println( "Looking for title in markdown header." );
         if ( reader == null )
         {
             return null;
@@ -357,13 +358,13 @@ public class Page
             if ( line.trim()
                      .startsWith( COMMENT_START ) )
             {
-                System.out.println( "In header." );
+                //                System.out.println( "In header." );
                 headerStarted = true;
             }
             else if ( line.trim()
                           .endsWith( COMMENT_END ) )
             {
-                System.out.println( "Out of header." );
+                //                System.out.println( "Out of header." );
                 break;
             }
             else if ( headerStarted )
@@ -378,12 +379,12 @@ public class Page
                     final String value = line.substring( idx + 1 )
                                              .trim();
 
-                    System.out.printf( "HEADER\n  Key: %s\n  Value: %s\n\n", key, value );
+                    //                    System.out.printf( "HEADER\n  Key: %s\n  Value: %s\n\n", key, value );
                     if ( TITLE.name()
                               .equalsIgnoreCase( key ) )
                     {
                         title = value;
-                        System.out.printf( "Got title: %s\n", title );
+                        //                        System.out.printf( "Got title: %s\n", title );
                         break;
                     }
                 }
@@ -415,11 +416,21 @@ public class Page
     public static String serverPathFor( final String group, final String title )
         throws MalformedURLException
     {
+        if ( title == null )
+        {
+            return null;
+        }
+
         return buildUrl( false, group, idFor( title ) );
     }
 
     public static String idFor( final String title )
     {
+        if ( title == null )
+        {
+            return null;
+        }
+
         return title.toLowerCase()
                     .replaceAll( "[^-_a-zA-Z0-9]+", "-" );
     }
@@ -432,16 +443,6 @@ public class Page
     public void setId( final String id )
     {
         this.id = id;
-    }
-
-    public String getServerPath()
-    {
-        return serverPath;
-    }
-
-    public void setServerPath( final String serverPath )
-    {
-        this.serverPath = serverPath;
     }
 
     @Override

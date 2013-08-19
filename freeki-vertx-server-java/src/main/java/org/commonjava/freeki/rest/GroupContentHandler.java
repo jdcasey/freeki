@@ -61,8 +61,49 @@ public class GroupContentHandler
 
     /* @formatter:off */
     @Routes( { 
+        @Route( path = "/api/group/:dir=(.+)", method = Method.DELETE )
+    } )
+    /* @formatter:on */
+    public void delete( final HttpServerRequest req )
+        throws Exception
+    {
+        String dir = req.params()
+                        .get( DIR.param() );
+
+        if ( dir == null )
+        {
+            dir = "/";
+        }
+
+        if ( !store.hasGroup( dir ) )
+        {
+            req.response()
+               .setStatusCode( 404 )
+               .setStatusMessage( "Not found" );
+            return;
+        }
+
+        final boolean success = store.deleteGroup( dir );
+        if ( success )
+        {
+            req.response()
+               .setStatusCode( 200 )
+               .setStatusMessage( "Deleted" )
+               .end();
+        }
+        else
+        {
+            req.response()
+               .setStatusCode( 417 )
+               .setStatusMessage( "Delete failed" )
+               .end();
+        }
+    }
+
+    /* @formatter:off */
+    @Routes( { 
         @Route( path = "/api/group/:dir=(.+)", method = Method.PUT ),
-        @Route( path = "/wiki/:dir=(.+)/", method = Method.PUT ), 
+        @Route( path = "/api/group/:dir=(.+)", method = Method.POST )
     } )
     /* @formatter:on */
     public void store( final HttpServerRequest req )
@@ -79,14 +120,17 @@ public class GroupContentHandler
         if ( store.storeGroup( new Group( dir ) ) )
         {
             req.response()
+               .putHeader( "Location", "/wiki/" + dir + "/" )
                .setStatusCode( 201 )
-               .setStatusMessage( "Created: " + dir );
+               .setStatusMessage( "Created: " + dir )
+               .end();
         }
         else
         {
             req.response()
                .setStatusCode( 400 )
-               .setStatusMessage( "Could not create: " + dir );
+               .setStatusMessage( "Could not create: " + dir )
+               .end();
         }
     }
 
@@ -120,7 +164,7 @@ public class GroupContentHandler
             dir = dir.substring( 0, dir.length() - 1 );
         }
 
-        System.out.printf( "Directory: %s\n", dir );
+        //        System.out.printf( "Directory: %s\n", dir );
 
         final String mimeAccept = MIMEParse.bestMatch( DIR_ACCEPT, acceptHeader );
         final ContentType type = ContentType.find( mimeAccept );
@@ -128,13 +172,12 @@ public class GroupContentHandler
         try
         {
             final Group group = store.getGroup( dir );
-            System.out.printf( "Got group with %d children:\n\n  %s\n\n", group.getChildren()
-                                                                               .size(),
-                               join( group.getChildren(), "\n  " ) );
+            logger.info( "Got group with %d children:\n\n  %s\n\n", group.getChildren()
+                                                                         .size(), join( group.getChildren(), "\n  " ) );
             final String rendered = engine.render( group, type );
 
             req.response()
-               .write( rendered );
+               .end( rendered );
         }
         catch ( IOException | RenderingException e )
         {

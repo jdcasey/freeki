@@ -8,9 +8,17 @@ if ( path.length > 0 ){
   path = newpath
 } %>
 <html>
-<head>
+  <head>
   <title>${me}</title>
-</head>
+    <script type="text/javascript" src="/static/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.js"></script>
+    <script type="text/javascript" src="/static/js/Markdown.Converter.js"></script>
+    <script type="text/javascript" src="/static/js/Markdown.Sanitizer.js"></script>
+    <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
+    
+    <link rel="stylesheet" href="/static/css/jquery-ui-1.10.3.custom.css">
+    <link rel="stylesheet" href="/static/css/pagedown.css">
+  </head>
 <body>
 <header id="header"></header>
 <div id="breadcrumbs">
@@ -26,8 +34,33 @@ if ( path.length > 0 ){
 </ul>
 <% } %>
 
+<div id="buttonbar-group-view" class="buttonbar">
+  <button id="group-new-form-trigger">New...</button>
+  <button id="delete-group">Delete</button>
+</div>
+<div id="group-new-panel" style="display:none">
+  <form id="group-new-form" class="microform">
+    <span class="form-line"><label>Title</label><input type="text" cols="40" id="group-new-title"/></span>
+    <span class="form-line">
+      <input type="radio" name="newtype" id="group-new-grouptype" value="group" checked="true">Group</input>
+      <input type="radio" name="newtype" id="group-new-pagetype" value="page">Page</input>
+    </span>
+    <div class="buttonbar microform-buttons">
+      <button id="group-new-submit">Create</button>
+      <button id="group-new-cancel">Cancel</button>
+    </div>
+  </form>
+</div>
+
 <footer><span style="font-size: small; float: center;">
 Generated on ${new Date()}.
 </span></footer>
+
+  <script type="text/javascript" src="/static/js/wikiMain.js"></script>
+  <script>
+    \$(document).ready(function(){
+      init('/api/group/${data.name}', '/wiki/${data.parent}/', '${data.name}' );
+    });
+  </script>
 </body>
 </html>

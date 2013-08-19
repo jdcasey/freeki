@@ -1,6 +1,6 @@
 package org.commonjava.freeki.conf;
 
-import java.net.URL;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,18 +18,26 @@ public class GTemplateConfig
     extends MapSectionListener
 {
 
-    private Map<ContentKey, URL> templates;
+    private Map<ContentKey, String> templates;
+
+    private File brandingDir;
 
     public GTemplateConfig()
     {
     }
 
-    public GTemplateConfig( final Map<String, String> rawTemplateMap )
+    public GTemplateConfig( final Map<String, String> rawTemplateMap, final File brandingDir )
     {
+        this.brandingDir = brandingDir;
         parseRawTemplateMap( rawTemplateMap );
     }
 
-    public URL getTemplate( final ContentType type, final String renderKey )
+    public File getBrandingDir()
+    {
+        return brandingDir;
+    }
+
+    public String getTemplate( final ContentType type, final String renderKey )
     {
         return templates.get( new ContentKey( type, renderKey ) );
     }
@@ -105,13 +113,13 @@ public class GTemplateConfig
 
     private void parseRawTemplateMap( final Map<String, String> rawTemplateMap )
     {
-        final Map<ContentKey, URL> templates = new HashMap<ContentKey, URL>();
+        final Map<ContentKey, String> templates = new HashMap<ContentKey, String>();
         for ( final Entry<String, String> entry : rawTemplateMap.entrySet() )
         {
             final String key = entry.getKey();
             final String value = entry.getValue();
 
-            System.out.printf( "Parsing raw template-map entry: %s = %s\n", key, value );
+            //            System.out.printf( "Parsing raw template-map entry: %s = %s\n", key, value );
 
             if ( value == null )
             {
@@ -125,22 +133,14 @@ public class GTemplateConfig
             }
 
             final ContentType type = ContentType.find( keyParts[1] );
-            System.out.printf( "Got content type: %s\nGot render key: %s\n", type, keyParts[1] );
+            //            System.out.printf( "Got content type: %s\nGot render key: %s\n", type, keyParts[1] );
             if ( type == null )
             {
                 continue;
             }
 
             final ContentKey ck = new ContentKey( type, keyParts[0] );
-            final URL url = Thread.currentThread()
-                                  .getContextClassLoader()
-                                  .getResource( value );
-            if ( url == null )
-            {
-                continue;
-            }
-
-            templates.put( ck, url );
+            templates.put( ck, value );
         }
 
         this.templates = templates;

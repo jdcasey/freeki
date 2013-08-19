@@ -104,6 +104,11 @@
       <artifactId>freeki-vertx-routing</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>args4j</groupId>
+      <artifactId>args4j</artifactId>
+      <version>2.0.12</version>
+    </dependency>
   </dependencies>
   
   <build>
@@ -130,6 +135,30 @@
             </annotationProcessors>
 
           </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.4</version>
+          <executions>
+            <execution>
+              <id>bin</id>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <phase>package</phase>
+              <configuration>
+                <descriptors>
+                  <descriptor>src/main/assembly/bin.xml</descriptor>
+                </descriptors>
+                <appendAssemblyId>false</appendAssemblyId>
+                <archive>
+                  <manifest>
+                    <mainClass>org.commonjava.freeki.cli.Main</mainClass>
+                  </manifest>
+                </archive>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <!-- <plugin> 
           <groupId>org.bsc.maven</groupId> 
@@ -192,6 +221,11 @@
         <artifactId>maven-processor-plugin</artifactId> 
       </plugin>
     </plugins> -->
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
   <dependencyManagement>
     <dependencies>

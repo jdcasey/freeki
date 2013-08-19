@@ -67,6 +67,53 @@ public class PageContentHandler
 
     /* @formatter:off */
     @Routes( {
+       @Route( path="/api/page/:dir=(.*)/:page", method=Method.DELETE ) 
+    } )
+    /* @formatter:on */
+    public void delete( final HttpServerRequest req )
+        throws Exception
+    {
+        String dir = req.params()
+                        .get( DIR.param() );
+
+        final String page = req.params()
+                               .get( PAGE.param() );
+
+        if ( dir == null )
+        {
+            dir = "/";
+        }
+
+        if ( !store.hasPage( dir, page ) )
+        {
+            req.response()
+               .setStatusCode( 404 )
+               .setStatusMessage( "Not found" )
+               .end();
+            return;
+        }
+
+        final boolean success = store.deletePage( dir, page );
+        if ( success )
+        {
+            req.response()
+               .setStatusCode( 200 )
+               .setStatusMessage( "Deleted" )
+               .end();
+        }
+        else
+        {
+            req.response()
+               .setStatusCode( 417 )
+               .setStatusMessage( "Delete failed" )
+               .end();
+        }
+    }
+
+    /* @formatter:off */
+    @Routes( {
+       @Route( path="/api/page/:page", method=Method.PUT, contentType="text/plain" ), 
+       @Route( path="/api/page/:page", method=Method.POST, contentType="text/plain" ), 
        @Route( path="/api/page/:dir=(.*)/:page", method=Method.PUT, contentType="text/plain" ), 
        @Route( path="/api/page/:dir=(.*)/:page", method=Method.POST, contentType="text/plain" ) 
     } )
@@ -85,8 +132,8 @@ public class PageContentHandler
             dir = "/";
         }
 
-        logger.info( "Page: %s\n", page );
-        logger.info( "Dir: %s\n", dir );
+        //        logger.info( "Page: %s\n", page );
+        //        logger.info( "Dir: %s\n", dir );
 
         final String group = dir;
 
@@ -96,12 +143,12 @@ public class PageContentHandler
             public void handle( final Buffer event )
             {
                 final String content = event.getString( 0, event.length() );
-                logger.info( "Received content:\n\n%s\n\n", content );
-
-                String title = page;
-
                 try
                 {
+                    //                    logger.info( "Received content:\n\n%s\n\n", content );
+
+                    String title = page;
+
                     final BufferedReader reader = new BufferedReader( new StringReader( content.toString() ) );
                     final String firstLine = reader.readLine();
                     if ( firstLine != null && firstLine.length() > 0 )
@@ -120,17 +167,19 @@ public class PageContentHandler
                         }
                     }
 
-                    logger.info( "Using title: %s", title );
+                    //                    logger.info( "Using title: %s", title );
 
                     Page pageObj = store.getPage( group, page );
                     if ( pageObj == null )
                     {
-                        pageObj = new Page( group, page, content, title, System.currentTimeMillis(), "unknown" );
+                        pageObj =
+                            new Page( group, Page.serverPathFor( group, page ), content.toString(), title,
+                                      System.currentTimeMillis(), "unknown" );
                     }
                     else
                     {
-                        logger.info( "Setting content:\n\n%s\n\n", content );
-                        pageObj.setContent( content );
+                        //                        logger.info( "Setting content:\n\n%s\n\n", content );
+                        pageObj.setContent( content.toString() );
                         pageObj.setUpdated( new Date() );
                         if ( pageObj.getTitle() == null )
                         {
@@ -138,22 +187,35 @@ public class PageContentHandler
                         }
                     }
 
+                    final String location = "/wiki/" + pageObj.getId();
+                    //                    logger.info( "Setting Location header to: '%s'", location );
                     if ( store.storePage( pageObj ) )
                     {
                         req.response()
+                           .putHeader( "Location", location )
                            .setStatusCode( 201 )
-                           .setStatusMessage( "Created: " + page );
+                           .setStatusMessage( "Created: " + page )
+                           .end();
                     }
                     else
                     {
                         req.response()
+                           .putHeader( "Location", location )
                            .setStatusCode( 200 )
-                           .setStatusMessage( "Stored updates to: " + page );
+                           .setStatusMessage( "Stored updates to: " + page )
+                           .end();
                     }
                 }
                 catch ( final Exception e )
                 {
                     logger.error( e.getMessage(), e );
+                    req.response()
+                       .setStatusCode( 500 )
+                       .setStatusMessage( e.getMessage() )
+                       .end( e.getMessage() );
+                }
+                finally
+                {
                 }
             }
         } );
@@ -161,7 +223,9 @@ public class PageContentHandler
 
     /* @formatter:off */
     @Routes( {
+       @Route( path="/wiki/:page", method=Method.GET ),
        @Route( path="/wiki/:dir=(.*)/:page", method=Method.GET ),
+       @Route( path="/api/page/:page", method=Method.GET, contentType="text/plain" ), 
        @Route( path="/api/page/:dir=(.*)/:page", method=Method.GET, contentType="text/plain" ) 
     } )
     /* @formatter:on */
@@ -189,7 +253,7 @@ public class PageContentHandler
 
         String mimeAccept = req.headers()
                                .get( RouteBinding.RECOMMENDED_CONTENT_TYPE );
-        logger.info( "Recommended content type: %s", mimeAccept );
+        //        logger.info( "Recommended content type: %s", mimeAccept );
 
         if ( mimeAccept == null )
         {
@@ -201,29 +265,24 @@ public class PageContentHandler
 
         final ContentType type = ContentType.find( mimeAccept );
 
-        logger.info( "Using content type: %s\n", type );
+        //        logger.info( "Using content type: %s\n", type );
 
         try
         {
             final Page pg = store.getPage( dir, page );
-            logger.info( "Got page: %s\n", pg );
+            //            logger.info( "Got page: %s\n", pg );
             final String rendered = engine.render( pg, type );
 
-            logger.info( "Rendered to:\n\n%s\n\n", rendered );
+            //            logger.info( "Rendered to:\n\n%s\n\n", rendered );
 
             req.response()
-               .write( rendered );
+               .end( rendered );
         }
         catch ( IOException | RenderingException e )
         {
             logger.error( "Failed to retrieve group: %s. Reason: %s", e, dir, e.getMessage() );
             throw e;
         }
-    }
-
-    private static final class BooleanHolder
-    {
-        private final boolean done = false;
     }
 
 }

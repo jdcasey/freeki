@@ -29,16 +29,16 @@ public class FreekiConfig
 
     private static final File DEFAULT_CONFIG_FILE = new File( USER_HOME, ".freeki.conf" );
 
-    private static final File DEFAULT_STORAGE_DIR = new File( USER_HOME, "freeki" );
+    public static final File DEFAULT_STORAGE_DIR = new File( USER_HOME, "freeki" );
 
-    private static final File DEFAULT_STATIC_DIR = new File( USER_HOME, "freeki/.static" );
+    public static final String DEFAULT_BRANDING_SUBPATH = ".branding";
 
     private File storageDir;
 
     @Inject
     private Instance<FreekiConfigSection> sections;
 
-    private File staticDir;
+    private File brandingDir;
 
     public FreekiConfig()
     {
@@ -49,10 +49,10 @@ public class FreekiConfig
         this( storageDir, null );
     }
 
-    public FreekiConfig( final File storageDir, final File staticDir )
+    public FreekiConfig( final File storageDir, final File brandingDir )
     {
         this.storageDir = storageDir;
-        this.staticDir = staticDir;
+        this.brandingDir = brandingDir;
     }
 
     @PostConstruct
@@ -95,15 +95,15 @@ public class FreekiConfig
         this.storageDir = storageDir;
     }
 
-    public File getStaticDir()
+    public File getBrandingDir()
     {
-        return staticDir == null ? DEFAULT_STATIC_DIR : staticDir;
+        return brandingDir == null ? new File( getStorageDir(), DEFAULT_BRANDING_SUBPATH ) : brandingDir;
     }
 
-    @ConfigName( "static.dir" )
-    public void setStaticDir( final File staticDir )
+    @ConfigName( "branding.dir" )
+    public void setBrandingDir( final File brandingDir )
     {
-        this.staticDir = staticDir;
+        this.brandingDir = brandingDir;
     }
 
 }

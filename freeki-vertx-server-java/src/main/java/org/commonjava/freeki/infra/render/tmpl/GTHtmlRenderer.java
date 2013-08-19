@@ -7,6 +7,7 @@ import groovy.lang.Writable;
 import groovy.text.GStringTemplateEngine;
 import groovy.text.Template;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
@@ -58,8 +59,8 @@ public class GTHtmlRenderer
     public String render( final Object data )
         throws RenderingException
     {
-        final URL url = config.getTemplate( TEXT_HTML, getTemplateKey( data ) );
-        System.out.printf( "Using template: %s\n", url );
+        final String path = config.getTemplate( TEXT_HTML, getTemplateKey( data ) );
+        //        System.out.printf( "Using template: %s\n", path );
         try
         {
             final Map<String, Object> map = new HashMap<String, Object>();
@@ -84,25 +85,43 @@ public class GTHtmlRenderer
 
             if ( content != null )
             {
-                System.out.printf( "Extracted raw content:\n\n%s\n\n", content );
+                //                System.out.printf( "Extracted raw content:\n\n%s\n\n", content );
                 final String renderedMarkdown = proc.markdownToHtml( content );
                 map.put( "rendered", renderedMarkdown );
             }
 
-            final Template template = engine.createTemplate( url );
+            final Template template;
+            final File templateFile = new File( config.getBrandingDir(), path );
+            if ( templateFile.exists() && !templateFile.isDirectory() )
+            {
+                template = engine.createTemplate( templateFile );
+            }
+            else
+            {
+                final URL u = Thread.currentThread()
+                                    .getContextClassLoader()
+                                    .getResource( path );
+                template = u == null ? null : engine.createTemplate( u );
+            }
+
+            if ( template == null )
+            {
+                throw new RenderingException( "Failed to locate template: %s", path );
+            }
+
             final Writable output = template.make( map );
 
             final StringWriter writer = new StringWriter();
             output.writeTo( writer );
 
             final String html = writer.toString();
-            System.out.printf( "Rendered html:\n\n%s\n\n", html );
+            //            System.out.printf( "Rendered html:\n\n%s\n\n", html );
 
             return html;
         }
         catch ( CompilationFailedException | ClassNotFoundException | IOException e )
         {
-            throw new RenderingException( "Failed to load template: %s. Reason: %s", e, url, e.getMessage() );
+            throw new RenderingException( "Failed to load template: %s. Reason: %s", e, path, e.getMessage() );
         }
     }
 

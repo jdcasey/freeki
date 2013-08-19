@@ -1,5 +1,6 @@
 package org.commonjava.freeki.rest;
 
+import org.commonjava.util.logging.Logger;
 import org.pegdown.PegDownProcessor;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
@@ -7,6 +8,8 @@ import org.vertx.java.core.http.HttpServerRequest;
 public class OopsHandler
     implements Handler<HttpServerRequest>
 {
+
+    private final Logger logger = new Logger( getClass() );
 
     private final PegDownProcessor proc;
 
@@ -21,12 +24,13 @@ public class OopsHandler
         req.response()
            .setChunked( true );
         req.response()
-           .setStatusCode( 200 );
+           .setStatusCode( 404 )
+           .setStatusMessage( "Not found" );
 
-        System.out.printf( "OOPS: %s\n", req.uri() );
+        logger.warn( "OOPS: %s\n", req.uri() );
 
         req.response()
-           .write( proc.markdownToHtml( "# NOT FOUND " + req.uri() ) );
+           .end( proc.markdownToHtml( "# NOT FOUND " + req.uri() ) );
     }
 
 }

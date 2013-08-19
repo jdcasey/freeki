@@ -130,17 +130,17 @@ public class FreekiStore
         final SortedSet<ChildRef> result = new TreeSet<ChildRef>();
         if ( d.isDirectory() )
         {
-            System.out.printf( "Listing children in directory: %s\n", d );
+            logger.info( "Listing children in directory: %s\n", d );
             final File[] files = d.listFiles();
 
             for ( final File file : files )
             {
                 final String name = file.getName();
-                System.out.println( name );
+                logger.info( name );
 
                 if ( name.startsWith( "." ) )
                 {
-                    System.out.printf( "Skipping: %s\n", name );
+                    logger.info( "Skipping: %s\n", name );
                     continue;
                 }
 
@@ -154,12 +154,17 @@ public class FreekiStore
                     try
                     {
                         br = new BufferedReader( new FileReader( file ) );
-                        final String title = Page.readTitle( br );
-                        System.out.printf( "Page %s has title: %s\n", file, title );
-                        if ( title != null )
+                        String title = Page.readTitle( br );
+                        logger.info( "Page %s has title: %s\n", file, title );
+                        if ( title == null )
                         {
-                            result.add( new ChildRef( ChildType.PAGE, title, Page.idFor( title ) ) );
+                            title = file.getName();
+                            if ( title.endsWith( ".md" ) )
+                            {
+                                title = title.substring( 0, title.length() - 3 );
+                            }
                         }
+                        result.add( new ChildRef( ChildType.PAGE, title, Page.idFor( title ) ) );
                     }
                     catch ( final IOException e )
                     {
@@ -245,7 +250,19 @@ public class FreekiStore
         return new Page( group, id, content, file.lastModified() );
     }
 
-    public boolean delete( final String group, final String id )
+    public boolean deleteGroup( final String group )
+        throws IOException
+    {
+        return doDelete( group, null );
+    }
+
+    public boolean deletePage( final String group, final String id )
+        throws IOException
+    {
+        return doDelete( group, id );
+    }
+
+    private boolean doDelete( final String group, final String id )
         throws IOException
     {
         File file = getFileById( group, id );
@@ -268,6 +285,7 @@ public class FreekiStore
             file = file.getParentFile();
         }
 
+        // TODO: Will file.isDirectory() return true if it was just deleted, above??
         while ( file.isDirectory() && !config.getStorageDir()
                                              .equals( file ) && file.list().length < 1 )
         {

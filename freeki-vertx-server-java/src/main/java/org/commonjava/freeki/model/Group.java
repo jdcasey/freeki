@@ -14,6 +14,8 @@ public class Group
 
     private String name;
 
+    private String parent;
+
     private SortedSet<ChildRef> children;
 
     public Group()
@@ -23,12 +25,14 @@ public class Group
     public Group( final String name )
     {
         this.name = name;
+        this.parent = new File( name ).getParent();
     }
 
     public Group( final String name, final Collection<ChildRef> children )
     {
         this.children = new TreeSet<ChildRef>( children );
         this.name = name;
+        this.parent = new File( name ).getParent();
     }
 
     public String getName()
@@ -81,6 +85,16 @@ public class Group
     public String toString()
     {
         return String.format( "Group [%s]", name );
+    }
+
+    public String getParent()
+    {
+        return parent;
+    }
+
+    public void setParent( final String parent )
+    {
+        this.parent = parent;
     }
 
 }

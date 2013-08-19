@@ -12,7 +12,6 @@ import org.commonjava.freeki.infra.route.Method;
 import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.infra.route.anno.Route;
 import org.commonjava.freeki.infra.route.anno.Routes;
-import org.commonjava.util.logging.Logger;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 
@@ -20,13 +19,13 @@ public class StaticContentHandler
     implements RouteHandler
 {
 
-    private final Logger logger = new Logger( getClass() );
+    //    private final Logger logger = new Logger( getClass() );
 
     private final File staticBasedir;
 
     public StaticContentHandler( final FreekiConfig mainConf )
     {
-        this.staticBasedir = mainConf.getStaticDir();
+        this.staticBasedir = new File( mainConf.getBrandingDir(), "static" );
     }
 
     /* @formatter:off */
@@ -46,28 +45,28 @@ public class StaticContentHandler
         final String path = req.params()
                                .get( PATH.param() );
 
-        logger.info( "Serving static path: '%s'", path );
+        //        logger.info( "Serving static path: '%s'", path );
 
         final File f = new File( staticBasedir, path );
         if ( !f.exists() )
         {
             final String resource = "static/" + path;
-            logger.info( "Path does not exist in static directory: %s; checking for classpath resource: '%s'",
-                         staticBasedir, resource );
+            //            logger.info( "Path does not exist in static directory: %s; checking for classpath resource: '%s'",
+            //                         staticBasedir, resource );
 
             final InputStream stream = Thread.currentThread()
                                              .getContextClassLoader()
                                              .getResourceAsStream( resource );
             if ( stream == null )
             {
-                logger.info( "No dice" );
+                //                logger.info( "No dice" );
                 req.response()
                    .setStatusMessage( "Not found" )
                    .setStatusCode( 404 );
             }
             else
             {
-                logger.info( "Sending classpath resource: %s", resource );
+                //                logger.info( "Sending classpath resource: %s", resource );
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 IOUtils.copy( stream, baos );
 
@@ -75,13 +74,10 @@ public class StaticContentHandler
                 {
                     final int len = baos.toByteArray().length;
                     final Buffer buf = new Buffer( baos.toByteArray() );
-                    logger.info( "Send: %d bytes", len );
+                    //                    logger.info( "Send: %d bytes", len );
                     req.response()
-                       .headers()
-                       .add( "Content-Length", Integer.toString( len ) );
-
-                    req.response()
-                       .write( buf );
+                       .putHeader( "Content-Length", Integer.toString( len ) )
+                       .end( buf );
                 }
                 finally
                 {
@@ -91,16 +87,18 @@ public class StaticContentHandler
         }
         else if ( f.isDirectory() )
         {
-            logger.info( "Requested file is actually a directory!" );
+            //            logger.info( "Requested file is actually a directory!" );
             req.response()
                .setStatusMessage( "Content is a directory" )
-               .setStatusCode( 404 );
+               .setStatusCode( 404 )
+               .end();
         }
         else
         {
-            logger.info( "Sending freeki file resource: %s", f.getAbsolutePath() );
+            //            logger.info( "Sending freeki file resource: %s", f.getAbsolutePath() );
             req.response()
-               .sendFile( f.getAbsolutePath() );
+               .sendFile( f.getAbsolutePath() )
+               .end();
         }
     }
 }

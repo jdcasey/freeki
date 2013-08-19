@@ -6,6 +6,7 @@ import groovy.lang.Writable;
 import groovy.text.GStringTemplateEngine;
 import groovy.text.Template;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
@@ -52,10 +53,27 @@ public class GTTextRenderer
     public String render( final Object data )
         throws RenderingException
     {
-        final URL url = config.getTemplate( TEXT_PLAIN, getTemplateKey( data ) );
+        final String path = config.getTemplate( TEXT_PLAIN, getTemplateKey( data ) );
         try
         {
-            final Template template = engine.createTemplate( url );
+            final Template template;
+            final File templateFile = new File( config.getBrandingDir(), path );
+            if ( templateFile.exists() && !templateFile.isDirectory() )
+            {
+                template = engine.createTemplate( templateFile );
+            }
+            else
+            {
+                final URL u = Thread.currentThread()
+                                    .getContextClassLoader()
+                                    .getResource( path );
+                template = u == null ? null : engine.createTemplate( u );
+            }
+
+            if ( template == null )
+            {
+                throw new RenderingException( "Failed to locate template: %s", path );
+            }
 
             final Map<String, Object> map = new HashMap<String, Object>();
             map.put( "data", data );
@@ -69,7 +87,7 @@ public class GTTextRenderer
         }
         catch ( CompilationFailedException | ClassNotFoundException | IOException e )
         {
-            throw new RenderingException( "Failed to load template: %s. Reason: %s", e, url, e.getMessage() );
+            throw new RenderingException( "Failed to load template: %s. Reason: %s", e, path, e.getMessage() );
         }
     }
 

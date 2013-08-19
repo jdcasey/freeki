@@ -1,7 +1,5 @@
 package org.commonjava.freeki.infra.route;
 
-import static org.apache.commons.lang.StringUtils.join;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -96,7 +94,7 @@ public class ApplicationRouter
         {
             final Method method = Method.valueOf( request.method() );
 
-            logger.info( "REQUEST>>> %s %s\n", method, request.path() );
+            //            logger.info( "REQUEST>>> %s %s\n", method, request.path() );
 
             final BindingContext ctx = findBinding( method, request.path() );
             if ( ctx != null )
@@ -116,7 +114,9 @@ public class ApplicationRouter
             {
                 // Default 404
                 request.response()
-                       .setStatusCode( 404 );
+                       .setStatusCode( 404 )
+                       .setStatusMessage( "No handler found" )
+                       .end();
             }
         }
         catch ( final Throwable t )
@@ -125,11 +125,7 @@ public class ApplicationRouter
             t.printStackTrace();
             request.response()
                    .setStatusCode( 500 )
-                   .setStatusMessage( "Error occurred during processing. See logs for more information." );
-        }
-        finally
-        {
-            request.response()
+                   .setStatusMessage( "Error occurred during processing. See logs for more information." )
                    .end();
         }
     }
@@ -164,7 +160,7 @@ public class ApplicationRouter
             }
         }
 
-        logger.info( "PARAMS: %s\n", params );
+        //        logger.info( "PARAMS: %s\n", params );
         request.params()
                .set( params );
     }
@@ -172,7 +168,7 @@ public class ApplicationRouter
     protected BindingContext findBinding( final Method method, final String path )
     {
         final List<PatternBinding> bindings = this.bindings.get( method );
-        logger.info( "Available bindings:\n  %s\n", join( bindings, "\n  " ) );
+        //        logger.info( "Available bindings:\n  %s\n", join( bindings, "\n  " ) );
         if ( bindings != null )
         {
             for ( final PatternBinding binding : bindings )
@@ -269,7 +265,7 @@ public class ApplicationRouter
         m.appendTail( sb );
         final String regex = sb.toString();
 
-        logger.info( "BIND regex: %s, groups: %s, route: %s\n", regex, groups, handler );
+        //        logger.info( "BIND regex: %s, groups: %s, route: %s\n", regex, groups, handler );
 
         final PatternBinding binding = new PatternBinding( Pattern.compile( regex ), groups, handler );
         bindings.add( binding );

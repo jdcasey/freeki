@@ -52,7 +52,7 @@ public class RenderingEngine
         }
 
         final ContentRenderer renderer = renderers.get( type );
-        System.out.printf( "Using renderer: %s for data: %s with content-type: %s\n", renderer, data, type );
+        //        System.out.printf( "Using renderer: %s for data: %s with content-type: %s\n", renderer, data, type );
         if ( renderer != null )
         {
             return renderer.render( data );

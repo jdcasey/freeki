@@ -1,4 +1,4 @@
-package org.commonjava.freeki;
+package org.commonjava.freeki.cli;
 
 import groovy.text.GStringTemplateEngine;
 
@@ -20,14 +20,16 @@ import org.commonjava.freeki.infra.route.ApplicationRouter;
 import org.commonjava.freeki.infra.route.RouteCollection;
 import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.rest.GroupContentHandler;
+import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
 import org.commonjava.freeki.rest.StaticContentHandler;
 import org.commonjava.freeki.store.FreekiStore;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.web.json.ser.JsonSerializer;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 import org.pegdown.PegDownProcessor;
 import org.vertx.java.core.Vertx;
-import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.impl.DefaultVertx;
 import org.vertx.java.platform.Verticle;
 
@@ -38,26 +40,83 @@ public class Main
     public static void main( final String[] args )
         throws IOException
     {
-        new Main().run();
+        new Main( args ).run();
     }
 
     private final PegDownProcessor proc;
 
     private final GStringTemplateEngine templates;
 
-    public Main()
+    private boolean canStart = false;
+
+    private final CliOptions opts;
+
+    public Main( final String[] args )
     {
-        start();
-        final Vertx v = new DefaultVertx();
-        setVertx( v );
-        proc = new PegDownProcessor();
-        templates = new GStringTemplateEngine();
+        opts = new CliOptions();
+        final CmdLineParser parser = new CmdLineParser( opts );
+        try
+        {
+            parser.parseArgument( args );
+            canStart = true;
+        }
+        catch ( final CmdLineException e )
+        {
+            System.out.printf( "ERROR: %s", e.getMessage() );
+            printUsage( parser, e );
+        }
+
+        if ( opts.isHelp() )
+        {
+            printUsage( parser, null );
+            canStart = false;
+        }
+
+        if ( canStart )
+        {
+            proc = new PegDownProcessor();
+            templates = new GStringTemplateEngine();
+        }
+        else
+        {
+            proc = null;
+            templates = null;
+        }
+    }
+
+    private static void printUsage( final CmdLineParser parser, final Exception error )
+    {
+        if ( error != null )
+        {
+            System.err.println( "Invalid option(s): " + error.getMessage() );
+            System.err.println();
+        }
+
+        System.err.println( "Usage: $0 [OPTIONS] [<target-path>]" );
+        System.err.println();
+        System.err.println();
+        // If we are running under a Linux shell COLUMNS might be available for the width
+        // of the terminal.
+        parser.setUsageWidth( ( System.getenv( "COLUMNS" ) == null ? 100 : Integer.valueOf( System.getenv( "COLUMNS" ) ) ) );
+        parser.printUsage( System.err );
+        System.err.println();
     }
 
     public void run()
         throws IOException
     {
-        final FreekiConfig mainConf = new FreekiConfig();
+        if ( !canStart )
+        {
+            return;
+        }
+
+        start();
+        final Vertx v = new DefaultVertx();
+        setVertx( v );
+
+        final FreekiConfig mainConf =
+            opts.getContentDir() == null ? new FreekiConfig() : new FreekiConfig( opts.getContentDir() );
+
         final FreekiStore store = new FreekiStore( mainConf );
 
         final Map<String, String> rawTemplateConf = new HashMap<>();
@@ -66,7 +125,7 @@ public class Main
         rawTemplateConf.put( "group@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/group.groovy" );
         rawTemplateConf.put( "page@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/page.groovy" );
 
-        final GTemplateConfig templateConfig = new GTemplateConfig( rawTemplateConf );
+        final GTemplateConfig templateConfig = new GTemplateConfig( rawTemplateConf, mainConf.getBrandingDir() );
 
         final Set<ContentRenderer> renderers = new HashSet<>();
         renderers.add( new GTHtmlRenderer( templates, proc, templateConfig ) );
@@ -88,13 +147,14 @@ public class Main
 
         final ServiceLoader<RouteCollection> collections = ServiceLoader.load( RouteCollection.class );
         final ApplicationRouter router = new ApplicationRouter( handlers, collections );
+        router.noMatch( new OopsHandler( proc ) );
 
-        final HttpServer http = vertx.createHttpServer();
+        final String listen = opts.getListen();
+        vertx.createHttpServer()
+             .requestHandler( router )
+             .listen( opts.getPort(), listen );
 
-        http.requestHandler( router )
-            .listen( 8080, "localhost" );
-
-        System.out.println( "Listening for requests." );
+        System.out.printf( "Listening for requests on %s:%s\n\n", opts.getListen(), opts.getPort() );
 
         synchronized ( this )
         {
