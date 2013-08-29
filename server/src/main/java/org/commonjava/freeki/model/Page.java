@@ -5,6 +5,8 @@ import static org.commonjava.freeki.util.UrlUtils.buildUrl;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.LineIterator;
 import org.commonjava.freeki.infra.anno.RenderKey;
@@ -35,25 +37,13 @@ public class Page
 
     private String group;
 
-    //    private final Map<String, String> metadata = new HashMap<>();
+    private Map<String, String> metadata = new HashMap<>();
 
     public Page()
     {
     }
 
-    public Page( final String group, final String id, final String content, final long lastUpdated )
-        throws MalformedURLException
-    {
-        this.group = group;
-        this.updated = new Date( lastUpdated );
-        this.id = serverPathFor( group, id );
-
-        //        System.out.printf( "Parsing page metadata for %s...", id );
-        //        this.content = parse( content );
-        //        System.out.printf( "...done. Content:\n\n'%s'\n\n", this.content );
-    }
-
-    public Page( final String group, final String id, final String content, final String title, final long created, final String author )
+    public Page( final String group, final String pageName, final String content, final String title, final long created, final String author )
         throws MalformedURLException
     {
         this.group = group;
@@ -61,13 +51,17 @@ public class Page
         this.content = content;
         this.title = title;
         this.currentAuthor = author;
-        this.id = id;
+        this.id = serverPathFor( group, pageName );
     }
 
-    public void repair()
-        throws MalformedURLException
+    public Map<String, String> getMetadata()
     {
-        this.id = serverPathFor( group, title );
+        return metadata;
+    }
+
+    public void setMetadata( final Map<String, String> metadata )
+    {
+        this.metadata = metadata;
     }
 
     public String getContent()

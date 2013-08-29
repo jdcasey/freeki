@@ -9,8 +9,6 @@ import java.io.File;
 
 import org.commonjava.freeki.conf.FreekiConfig;
 import org.commonjava.freeki.model.Page;
-import org.commonjava.freeki.model.io.PrettyPrintingAdapter;
-import org.commonjava.web.json.ser.JsonSerializer;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revplot.PlotCommit;
 import org.eclipse.jgit.revplot.PlotLane;
@@ -34,7 +32,7 @@ public class FreekiStoreTest
         throws Exception
     {
         dir = temp.newFolder( "freeki" );
-        store = new FreekiStore( new FreekiConfig( dir ), new JsonSerializer( new PrettyPrintingAdapter() ) );
+        store = new FreekiStore( new FreekiConfig( dir )/*, new JsonSerializer( new PrettyPrintingAdapter() )*/);
 
         final Page pg = new Page( "mygroup", "page-id", "# Page Id\n\n## This is a header", "Page Id", System.currentTimeMillis(), "John Casey" );
         store.storePage( pg );

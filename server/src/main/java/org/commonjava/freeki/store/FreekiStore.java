@@ -6,10 +6,12 @@ import static org.apache.commons.io.FileUtils.write;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -17,13 +19,13 @@ import java.util.TreeSet;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.commonjava.freeki.conf.FreekiConfig;
 import org.commonjava.freeki.model.ChildRef;
 import org.commonjava.freeki.model.ChildRef.ChildType;
 import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.model.Page;
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.json.ser.JsonSerializer;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RmCommand;
@@ -42,22 +44,28 @@ import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
-import com.google.gson.reflect.TypeToken;
-
 public class FreekiStore
 {
 
     private static final CharSequence README = "This is a marker file for a freeki content group. You can add pages to this group through the UI.";
 
-    private static final String PAGE_TITLE = "title";
+    private static final String COMMENT_BEGIN = "<!--";
 
-    private static final String PAGE_STATUS = "status";
+    private static final String COMMENT_END = "-->";
+
+    private static final String MD_TITLE = "TITLE";
+
+    private static final String METADATA_WARNING = "Freeki metadata. Do not remove this section!";
+
+    private static final String H1 = "# ";
+
+    private static final String H1_ALT = "#";
+
+    private static final String MD_CONTENT = "CONTENT";
 
     private final Logger logger = new Logger( getClass() );
 
     private final FreekiConfig config;
-
-    private final JsonSerializer serializer;
 
     private Git git;
 
@@ -69,11 +77,10 @@ public class FreekiStore
 
     private FileRepository repo;
 
-    public FreekiStore( final FreekiConfig config, final JsonSerializer serializer )
+    public FreekiStore( final FreekiConfig config )
         throws IOException
     {
         this.config = config;
-        this.serializer = serializer;
         setupGit();
     }
 
@@ -117,7 +124,7 @@ public class FreekiStore
 
     public boolean hasPage( final String group, final String title )
     {
-        final File file = getFile( group, title );
+        final File file = getFileByTitle( group, title );
         return file.isFile();
     }
 
@@ -167,8 +174,9 @@ public class FreekiStore
                     try
                     {
                         final String fname = file.getName();
-                        final PlotCommit<PlotLane> commit = getHeadCommit( file );
-                        final String title = getTitle( commit );
+                        final String content = FileUtils.readFileToString( file );
+                        final Map<String, String> metadata = getMetadata( content, false );
+                        final String title = metadata.get( MD_TITLE );
 
                         result.add( new ChildRef( ChildType.PAGE, title, fname.substring( 0, fname.length() - 3 ) ) );
                     }
@@ -183,18 +191,10 @@ public class FreekiStore
         return result;
     }
 
-    private String getTitle( final PlotCommit<PlotLane> commit )
-    {
-        final Map<String, String> map = serializer.fromString( commit.getFullMessage(), new TypeToken<Map<String, String>>()
-        {
-        } );
-        return map.get( PAGE_TITLE );
-    }
-
     public boolean storeGroup( final Group group )
         throws IOException
     {
-        final File groupDir = getFile( group.getName(), null );
+        final File groupDir = getFile( group.getName() );
         if ( !groupDir.exists() )
         {
             groupDir.mkdirs();
@@ -211,9 +211,7 @@ public class FreekiStore
     public boolean storePage( final Page page )
         throws IOException
     {
-        page.repair();
-
-        final File pageFile = getFile( page.getGroup(), page.getTitle() );
+        final File pageFile = getFile( page.getId() + ".md" );
         final File dir = pageFile.getParentFile();
 
         if ( !dir.isDirectory() && !dir.mkdirs() )
@@ -223,19 +221,65 @@ public class FreekiStore
 
         final boolean update = pageFile.exists();
 
-        write( pageFile, page.getContent() );
+        if ( page.getTitle() == null )
+        {
+            final Map<String, String> existingMeta = page.getMetadata();
+            final Map<String, String> parsed = getMetadata( page.getContent(), false );
+            parsed.putAll( existingMeta );
 
-        final Map<String, String> meta = new HashMap<>();
-        meta.put( PAGE_TITLE, page.getTitle() );
-        meta.put( PAGE_STATUS, ( update ? "Updating" : "Creating" ) );
-        addAndCommit( pageFile, serializer.toString( meta ) );
+            page.setMetadata( parsed );
+            page.setTitle( parsed.get( MD_TITLE ) );
+        }
+
+        String content = page.getContent();
+
+        final Map<String, String> meta = page.getMetadata();
+        if ( meta.get( MD_TITLE ) == null )
+        {
+            meta.put( MD_TITLE, page.getTitle() );
+        }
+
+        if ( meta != null && !meta.isEmpty() )
+        {
+            final StringBuilder sb = new StringBuilder();
+            sb.append( COMMENT_BEGIN )
+              .append( " " )
+              .append( METADATA_WARNING );
+
+            for ( final Entry<String, String> entry : meta.entrySet() )
+            {
+                final String key = entry.getKey();
+                final String value = entry.getValue();
+
+                sb.append( '\n' )
+                  .append( key )
+                  .append( ": " )
+                  .append( value );
+            }
+
+            sb.append( '\n' )
+              .append( COMMENT_END );
+            sb.append( '\n' )
+              .append( content );
+
+            content = sb.toString();
+        }
+
+        write( pageFile, content );
+
+        addAndCommit( pageFile, ( update ? "Updating" : "Creating" ) );
 
         return !update;
     }
 
-    private File getFile( final String group, final String title )
+    private File getFile( final String id )
     {
-        return getFileById( group, title == null ? null : Page.idFor( title ) );
+        return getFileById( id, null );
+    }
+
+    private File getFileByTitle( final String pathBase, final String title )
+    {
+        return getFileById( pathBase, title == null ? null : Page.idFor( title ) );
     }
 
     private File getFileById( final String group, final String id )
@@ -257,7 +301,7 @@ public class FreekiStore
         }
 
         System.out.printf( "Reading page from: %s\n", file );
-        final String content = readFileToString( file );
+        String content = readFileToString( file );
         System.out.printf( "Page content:\n\n%s\n\n", content );
 
         PlotCommit<PlotLane> commit;
@@ -270,11 +314,87 @@ public class FreekiStore
             throw new IOException( String.format( "Failed to read commit information for: %s. Reason: %s", file, e.getMessage() ), e );
         }
 
-        final String title = getTitle( commit );
+        final Map<String, String> metadata = getMetadata( content, true );
+        content = metadata.remove( MD_CONTENT );
+        final String title = metadata.get( MD_TITLE );
         final PersonIdent ai = commit.getAuthorIdent();
 
         return new Page( group, id, content, title, ai.getWhen()
                                                       .getTime(), ai.getName() );
+    }
+
+    private Map<String, String> getMetadata( final String content, final boolean reformatContent )
+    {
+        final LineIterator li = new LineIterator( new StringReader( content ) );
+        final Map<String, String> metadata = new HashMap<>();
+
+        final StringBuilder sb = new StringBuilder();
+
+        boolean startMetadata = false;
+        boolean stopMetadata = false;
+        boolean startContent = false;
+        while ( li.hasNext() )
+        {
+            final String line = li.next();
+            if ( line.trim()
+                     .startsWith( COMMENT_BEGIN ) )
+            {
+                startMetadata = true;
+            }
+            else if ( line.trim()
+                          .endsWith( COMMENT_END ) )
+            {
+                stopMetadata = true;
+            }
+            else if ( startMetadata && !stopMetadata )
+            {
+                final String[] parts = line.trim()
+                                           .split( "\\s*:\\s*" );
+                if ( parts.length == 2 )
+                {
+                    metadata.put( parts[0], parts[1] );
+                }
+            }
+            else if ( stopMetadata && !startContent && line.trim()
+                                                           .length() > 0 )
+            {
+                startContent = true;
+            }
+
+            if ( startContent )
+            {
+                String title = metadata.get( MD_TITLE );
+                if ( title == null && line.startsWith( H1 ) )
+                {
+                    title = line.substring( H1.length() );
+                    metadata.put( MD_TITLE, title );
+                }
+                else if ( title == null && line.startsWith( H1_ALT ) )
+                {
+                    title = line.substring( H1_ALT.length() );
+                    if ( !title.startsWith( "#" ) )
+                    {
+                        metadata.put( MD_TITLE, title );
+                    }
+                }
+
+                if ( !reformatContent && title != null )
+                {
+                    break;
+                }
+
+                if ( sb.length() > 0 )
+                {
+                    sb.append( '\n' );
+                }
+
+                sb.append( line );
+            }
+        }
+
+        metadata.put( MD_CONTENT, sb.toString() );
+
+        return metadata;
     }
 
     public boolean deleteGroup( final String group )

@@ -19,7 +19,6 @@ import org.commonjava.freeki.infra.render.tmpl.GTTextRenderer;
 import org.commonjava.freeki.infra.route.ApplicationRouter;
 import org.commonjava.freeki.infra.route.RouteCollection;
 import org.commonjava.freeki.infra.route.RouteHandler;
-import org.commonjava.freeki.model.io.PrettyPrintingAdapter;
 import org.commonjava.freeki.rest.GroupContentHandler;
 import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
@@ -117,8 +116,7 @@ public class Main
 
         final FreekiConfig mainConf = opts.getContentDir() == null ? new FreekiConfig() : new FreekiConfig( opts.getContentDir() );
 
-        final JsonSerializer serializer = new JsonSerializer( new PrettyPrintingAdapter() );
-        final FreekiStore store = new FreekiStore( mainConf, serializer );
+        final FreekiStore store = new FreekiStore( mainConf );
 
         final Map<String, String> rawTemplateConf = new HashMap<>();
         rawTemplateConf.put( "group@" + ContentType.TEXT_HTML.value(), "groovy/html/group.groovy" );
@@ -131,6 +129,8 @@ public class Main
         final Set<ContentRenderer> renderers = new HashSet<>();
         renderers.add( new GTHtmlRenderer( templates, proc, templateConfig ) );
         renderers.add( new GTTextRenderer( templates, templateConfig ) );
+
+        final JsonSerializer serializer = new JsonSerializer(/* new PrettyPrintingAdapter() */);
         renderers.add( new JsonRenderer( serializer ) );
 
         final RenderingEngine engine = new RenderingEngine( renderers );
