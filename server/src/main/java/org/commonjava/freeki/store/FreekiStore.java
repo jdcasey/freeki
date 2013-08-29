@@ -3,14 +3,13 @@ package org.commonjava.freeki.store;
 import static org.apache.commons.io.FileUtils.forceDelete;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.io.FileUtils.write;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -24,23 +23,41 @@ import org.commonjava.freeki.model.ChildRef.ChildType;
 import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.model.Page;
 import org.commonjava.util.logging.Logger;
+import org.commonjava.web.json.ser.JsonSerializer;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.revplot.PlotCommit;
+import org.eclipse.jgit.revplot.PlotCommitList;
+import org.eclipse.jgit.revplot.PlotLane;
+import org.eclipse.jgit.revplot.PlotWalk;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
+
+import com.google.gson.reflect.TypeToken;
 
 public class FreekiStore
 {
 
-    private static final CharSequence README =
-        "This is a marker file for a freeki content group. You can add pages to this group through the UI.";
+    private static final CharSequence README = "This is a marker file for a freeki content group. You can add pages to this group through the UI.";
+
+    private static final String PAGE_TITLE = "title";
+
+    private static final String PAGE_STATUS = "status";
 
     private final Logger logger = new Logger( getClass() );
 
     private final FreekiConfig config;
+
+    private final JsonSerializer serializer;
 
     private Git git;
 
@@ -50,10 +67,13 @@ public class FreekiStore
 
     private String email;
 
-    public FreekiStore( final FreekiConfig config )
+    private FileRepository repo;
+
+    public FreekiStore( final FreekiConfig config, final JsonSerializer serializer )
         throws IOException
     {
         this.config = config;
+        this.serializer = serializer;
         setupGit();
     }
 
@@ -71,7 +91,7 @@ public class FreekiStore
         final FileRepositoryBuilder builder = new FileRepositoryBuilder().setGitDir( gitDir )
                                                                          .readEnvironment();
 
-        final FileRepository repo = builder.build();
+        repo = builder.build();
 
         username = repo.getConfig()
                        .getString( "user", null, "name" );
@@ -144,35 +164,31 @@ public class FreekiStore
                 }
                 else
                 {
-                    BufferedReader br = null;
                     try
                     {
-                        br = new BufferedReader( new FileReader( file ) );
-                        String title = Page.readTitle( br );
-                        logger.info( "Page %s has title: %s\n", file, title );
-                        if ( title == null )
-                        {
-                            title = file.getName();
-                            if ( title.endsWith( ".md" ) )
-                            {
-                                title = title.substring( 0, title.length() - 3 );
-                            }
-                        }
-                        result.add( new ChildRef( ChildType.PAGE, title, Page.idFor( title ) ) );
+                        final String fname = file.getName();
+                        final PlotCommit<PlotLane> commit = getHeadCommit( file );
+                        final String title = getTitle( commit );
+
+                        result.add( new ChildRef( ChildType.PAGE, title, fname.substring( 0, fname.length() - 3 ) ) );
                     }
-                    catch ( final IOException e )
+                    catch ( final Exception e )
                     {
                         logger.error( "Cannot read: '%s'. Reason: %s", e, file, e.getMessage() );
-                    }
-                    finally
-                    {
-                        closeQuietly( br );
                     }
                 }
             }
         }
 
         return result;
+    }
+
+    private String getTitle( final PlotCommit<PlotLane> commit )
+    {
+        final Map<String, String> map = serializer.fromString( commit.getFullMessage(), new TypeToken<Map<String, String>>()
+        {
+        } );
+        return map.get( PAGE_TITLE );
     }
 
     public boolean storeGroup( final Group group )
@@ -207,9 +223,12 @@ public class FreekiStore
 
         final boolean update = pageFile.exists();
 
-        write( pageFile, page.render() );
-        addAndCommit( pageFile, ( update ? "Updating" : "Creating" ) + " page: " + page.getTitle() + " in group: "
-            + page.getGroup() );
+        write( pageFile, page.getContent() );
+
+        final Map<String, String> meta = new HashMap<>();
+        meta.put( PAGE_TITLE, page.getTitle() );
+        meta.put( PAGE_STATUS, ( update ? "Updating" : "Creating" ) );
+        addAndCommit( pageFile, serializer.toString( meta ) );
 
         return !update;
     }
@@ -241,7 +260,21 @@ public class FreekiStore
         final String content = readFileToString( file );
         System.out.printf( "Page content:\n\n%s\n\n", content );
 
-        return new Page( group, id, content, file.lastModified() );
+        PlotCommit<PlotLane> commit;
+        try
+        {
+            commit = getHeadCommit( file );
+        }
+        catch ( final Exception e )
+        {
+            throw new IOException( String.format( "Failed to read commit information for: %s. Reason: %s", file, e.getMessage() ), e );
+        }
+
+        final String title = getTitle( commit );
+        final PersonIdent ai = commit.getAuthorIdent();
+
+        return new Page( group, id, content, title, ai.getWhen()
+                                                      .getTime(), ai.getName() );
     }
 
     public boolean deleteGroup( final String group )
@@ -290,8 +323,7 @@ public class FreekiStore
 
         if ( !deleted.isEmpty() )
         {
-            deleteAndCommit( deleted, "Removing page: " + id + " from group: " + group
-                + ", and pruning empty directories." );
+            deleteAndCommit( deleted, "Removing page: " + id + " from group: " + group + ", and pruning empty directories." );
 
             return true;
         }
@@ -361,6 +393,29 @@ public class FreekiStore
             throw new IOException( "Cannot remove from git: " + e.getMessage(), e );
         }
 
+    }
+
+    // FIXME: Refine throws.
+    public PlotCommit<PlotLane> getHeadCommit( final File f )
+        throws Exception
+    {
+        final ObjectId oid = repo.resolve( "HEAD" );
+        final PlotWalk pw = new PlotWalk( repo );
+        final RevCommit rc = pw.parseCommit( oid );
+        pw.markStart( rc );
+        pw.setTreeFilter( AndTreeFilter.create( PathFilter.create( f.getPath()
+                                                                    .substring( basepathLength ) ), TreeFilter.ANY_DIFF ) );
+
+        final PlotCommitList<PlotLane> cl = new PlotCommitList<>();
+        cl.source( pw );
+        cl.fillTo( 1 );
+
+        return cl.get( 0 );
+        //        final PersonIdent ident = pc.getAuthorIdent();
+        //        final String message = pc.getFullMessage();
+        //        System.out.printf( "%s %s %s %s %s\n\n%s\n", ident.getName(), ident.getEmailAddress(), ident.getWhen(), ident.getTimeZone()
+        //                                                                                                                     .getID(),
+        //                           ident.getTimeZoneOffset(), message );
     }
 
     public SortedSet<Group> listGroups( final String subgroup )

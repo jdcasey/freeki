@@ -36,7 +36,7 @@ ${data.content}
 </div>
 
   <span style="font-size: small; float: center;">
-    Created on ${data.created}. Last updated: ${data.updated} by ${data.currentAuthor}.
+    Last updated: ${data.updated} by ${data.currentAuthor}.
   </span>
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>
   <script>
