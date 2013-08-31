@@ -20,6 +20,9 @@ public class CliOptions
     @Option( name = "-h", aliases = "--help", usage = "Show this help screen" )
     private boolean help;
 
+    @Option( name = "-b", aliases = "--branding", usage = "Branding content directory (default: $HOME/freeki/.branding)" )
+    private File brandingDir;
+
     public int getPort()
     {
         return port;
@@ -58,6 +61,16 @@ public class CliOptions
     public void setListen( final String listen )
     {
         this.listen = listen;
+    }
+
+    public File getBrandingDir()
+    {
+        return brandingDir;
+    }
+
+    public void setBrandingDir( final File brandingDir )
+    {
+        this.brandingDir = brandingDir;
     }
 
 }

@@ -92,6 +92,19 @@
   </dependencies>
   
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>${project.build.directory}/generated-sources/annotations</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>META-INF/services/**</include>
+        </includes>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>

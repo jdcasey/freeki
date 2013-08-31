@@ -114,7 +114,8 @@ public class Main
         final Vertx v = new DefaultVertx();
         setVertx( v );
 
-        final FreekiConfig mainConf = opts.getContentDir() == null ? new FreekiConfig() : new FreekiConfig( opts.getContentDir() );
+        final FreekiConfig mainConf =
+            opts.getContentDir() == null ? new FreekiConfig() : new FreekiConfig( opts.getContentDir(), opts.getBrandingDir() );
 
         final FreekiStore store = new FreekiStore( mainConf );
 
