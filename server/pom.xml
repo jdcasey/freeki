@@ -97,13 +97,13 @@
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
       </resource>
-      <resource>
+      <!-- <resource>
         <directory>${project.build.directory}/generated-sources/annotations</directory>
         <filtering>false</filtering>
         <includes>
           <include>META-INF/services/**</include>
         </includes>
-      </resource>
+      </resource> -->
     </resources>
     <pluginManagement>
       <plugins>
@@ -124,6 +124,30 @@
               <annotationProcessor>org.commonjava.freeki.infra.route.anno.proc.RoutingAnnotationProcessor</annotationProcessor>
             </annotationProcessors>
           </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>extra-resources-copy</id>
+              <phase>process-classes</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>${project.build.directory}/generated-sources/annotations</directory>
+                    <filtering>false</filtering>
+                    <includes>
+                      <include>META-INF/services/**</include>
+                    </includes>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
