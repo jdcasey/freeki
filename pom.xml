@@ -9,7 +9,7 @@
 
   <groupId>org.commonjava.freeki</groupId>
   <artifactId>freeki-vertx-parent</artifactId>
-  <version>0.2</version>
+  <version>0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Freeki Vert.x Server :: Parent</name>
@@ -34,7 +34,7 @@
       <dependency>
         <groupId>org.commonjava.freeki</groupId>
         <artifactId>freeki-vertx-routing-api</artifactId>
-        <version>0.2</version>
+        <version>0.3-SNAPSHOT</version>
       </dependency>
       
       <dependency>
