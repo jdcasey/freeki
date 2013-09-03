@@ -2,13 +2,13 @@
 <html>
   <head>
     <title>${data.title}</title>
-    <script type="text/javascript" src="/static/js/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-ui.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Converter.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Sanitizer.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
     
-    <link rel="stylesheet" href="/static/css/jquery-ui-1.10.3.custom.css"/>
+    <link rel="stylesheet" href="/static/css/jquery-ui.css"/>
     <link rel="stylesheet" href="/static/css/pagedown.css"/>
     <link rel="stylesheet" href="/static/css/branding.css"/>
   </head>
@@ -29,14 +29,21 @@
 </div>
 </div>
 <div id="page-edit" style="display:none">
-  <div id="page-editor" class="wmd-panel">
-    <div id="wmd-button-bar"></div>
-    <textarea class="wmd-input" id="wmd-input">
+  <div id="editor-content">
+    <ul>
+      <li><a href="#editor-panel">Edit</a></li>
+      <li><a class="preview-button" href="#preview-panel">Preview</a></li>
+    </ul>
+    <div id="editor-panel">
+      <div id="page-editor" class="wmd-panel">
+        <div id="wmd-button-bar"></div>
+        <textarea class="wmd-input" id="wmd-input">
 ${data.content}
 </textarea>
+      </div>
+    </div>
+    <div id="preview-panel">Preview goes here.</div>
   </div>
-  <div id="page-edit-help" class="edit-help"></div>
-  <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
   <div id="buttonbar-editor-controls" class="buttonbar">
     <button id="save-edit">Save</button>
     <button id="cancel-edit">Cancel</button>
@@ -44,19 +51,23 @@ ${data.content}
   </div>
 </div>
 
-<footer id="page-footer">
-  <div class="generated-on">
-  <span style="font-size: small;">
-    Last updated: ${data.updated} by ${data.currentAuthor}.
-  </span>
-  </div>
-<div class="freeki-branding-help"><span style="font-size: 8pt; float: left;"><b>NOTE:</b> You can turn these off by editing \$HOME/freeki/.branding/static/css/branding.css and adding:
+  <footer id="page-footer">
+    <div class="generated-on">
+      <span style="font-size: small;">Last updated: ${data.updated} by ${data.currentAuthor}.</span>
+    </div>
+    <div class="freeki-branding-help">
+      <span style="font-size: 8pt; float: left;"><b>NOTE:</b> You can turn these off by editing \$HOME/freeki/.branding/static/css/branding.css and adding:
 <pre>
 .freeki-branding-help, .freeki-plug{display:none;}
 </pre>
-</span>
-</div>
-</footer>
+      </span>
+    </div>
+  </footer>
+
+<!-- hidden panels -->
+  <div id="page-edit-help" class="edit-help">Help goes here.<br/>Blat<br/>Blah.<br/>Boo</div>
+  <div id="wmd-preview" class="wmd-preview" style="display:none"></div>
+
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>
   <script>
     \$(document).ready(function(){

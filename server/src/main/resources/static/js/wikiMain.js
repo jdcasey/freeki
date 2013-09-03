@@ -13,6 +13,8 @@ function init( url, parent, groupName ){
 	parentUrl = parent;
 	group = groupName;
 	
+	$('#editor-content').tabs();
+	
 	var mdPane = $('#wmd-input');
 	if ( mdPane ){
 		converter = new Markdown.Converter();
@@ -21,7 +23,12 @@ function init( url, parent, groupName ){
 		  return text;
 		});
 		
-		editor = new Markdown.Editor(converter);
+		editor = new Markdown.Editor(converter, "", {
+			title: "Wiki Formatting Help",
+			handler: function(click){
+				alert("Help clicked: " + JSON.stringify( click ) );
+			}
+		});
 		editor.run();
 		
 		pageContent = $(mdPane).text();
@@ -35,6 +42,16 @@ function init( url, parent, groupName ){
 		}
 	}
 }
+
+$('.preview-button').click(function(){
+	// bit non-obvious, but pagedown updates this pane in realtime, so we pull
+	// the html from there to display in our own preview pane. This wmd preview
+	// pane is display:none to suppress it in favor of our own.
+	var content = $('#wmd-preview').html();
+	var rendered = converter.makeHtml(content);
+	
+	$('#preview-panel').html(rendered);
+});
 
 $('#edit-page').click(function(){
   $('#page-content').hide();
