@@ -211,7 +211,8 @@ function showTemplateForm(){
 		$('#template-form').attr('action', templateFormUrl).attr('method', 'POST').html(data);
 
 		$('#template-panel').dialog({
-			height: 140,
+			height: 600,
+			width: 600,
 			modal: true,
 		});
 	}).fail(function(data,textstatus,error){
