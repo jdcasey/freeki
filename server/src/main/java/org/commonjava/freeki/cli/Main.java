@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.commonjava.freeki.conf.FreekiConfig;
 import org.commonjava.freeki.conf.GTemplateConfig;
+import org.commonjava.freeki.data.FreekiStore;
+import org.commonjava.freeki.data.TemplateController;
 import org.commonjava.freeki.infra.render.ContentRenderer;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.json.JsonRenderer;
@@ -23,7 +25,7 @@ import org.commonjava.freeki.rest.GroupContentHandler;
 import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
 import org.commonjava.freeki.rest.StaticContentHandler;
-import org.commonjava.freeki.store.FreekiStore;
+import org.commonjava.freeki.rest.TemplateContentHandler;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.web.json.ser.JsonSerializer;
 import org.kohsuke.args4j.CmdLineException;
@@ -115,7 +117,8 @@ public class Main
         setVertx( v );
 
         final FreekiConfig mainConf =
-            opts.getContentDir() == null ? new FreekiConfig() : new FreekiConfig( opts.getContentDir(), opts.getBrandingDir() );
+            opts.getContentDir() == null ? new FreekiConfig()
+                            : new FreekiConfig( opts.getContentDir(), opts.getBrandingDir(), opts.getTemplatesDir() );
 
         final FreekiStore store = new FreekiStore( mainConf );
 
@@ -144,6 +147,7 @@ public class Main
                 add( new GroupContentHandler( store, engine ) );
                 add( new PageContentHandler( store, engine ) );
                 add( new StaticContentHandler( mainConf ) );
+                add( new TemplateContentHandler( new TemplateController( store, mainConf ), serializer ) );
             }
         };
 

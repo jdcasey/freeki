@@ -1,4 +1,4 @@
-package org.commonjava.freeki.store;
+package org.commonjava.freeki.data;
 
 import static org.apache.commons.io.FileUtils.forceDelete;
 import static org.apache.commons.io.FileUtils.readFileToString;

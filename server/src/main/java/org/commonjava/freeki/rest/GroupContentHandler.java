@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.commonjava.freeki.data.FreekiStore;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.infra.route.Method;
@@ -17,7 +18,6 @@ import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.infra.route.anno.Route;
 import org.commonjava.freeki.infra.route.anno.Routes;
 import org.commonjava.freeki.model.Group;
-import org.commonjava.freeki.store.FreekiStore;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.mimeparse.MIMEParse;
 import org.commonjava.util.logging.Logger;

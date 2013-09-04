@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 
 import org.commonjava.freeki.conf.FreekiConfig;
+import org.commonjava.freeki.data.FreekiStore;
 import org.commonjava.freeki.model.Page;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revplot.PlotCommit;

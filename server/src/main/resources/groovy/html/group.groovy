@@ -10,13 +10,13 @@ if ( path.length > 0 ){
 <html>
   <head>
   <title>${me}</title>
-    <script type="text/javascript" src="/static/js/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="/static/js/jquery-ui-1.10.3.custom.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-ui.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Converter.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Sanitizer.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
     
-    <link rel="stylesheet" href="/static/css/jquery-ui-1.10.3.custom.css"/>
+    <link rel="stylesheet" href="/static/css/jquery-ui.css"/>
     <link rel="stylesheet" href="/static/css/pagedown.css"/>
     <link rel="stylesheet" href="/static/css/branding.css"/>
   </head>
@@ -53,6 +53,10 @@ if ( path.length > 0 ){
     <span class="form-line">
       <input type="radio" name="newtype" id="group-new-grouptype" value="group" checked="true">Group</input>
       <input type="radio" name="newtype" id="group-new-pagetype" value="page">Page</input>
+      <input type="radio" name="newtype" id="group-new-template" value="template">From Template...</input>
+    </span>
+    <span class="form-line" id="template-selector-field" style="display:none">
+      <label>Choose a Template:</label><select id="templates-list"><option>Select a template</option></select>
     </span>
     <div class="buttonbar microform-buttons">
       <button id="group-new-submit">Create</button>
@@ -74,6 +78,16 @@ if ( path.length > 0 ){
 </span>
 </div>
 </footer>
+
+<!-- hidden panels -->
+  <div id="template-panel" style="display:none">
+    <form id="template-form">
+    </form>
+    <div class="buttonbar">
+      <button id="template-form-submit">Create</button>
+      <button id="template-form-cancel">Cancel</button>
+    </div>
+  </div>
 
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>
   <script>

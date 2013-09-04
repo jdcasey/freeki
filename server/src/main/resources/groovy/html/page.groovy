@@ -65,7 +65,7 @@ ${data.content}
   </footer>
 
 <!-- hidden panels -->
-  <div id="page-edit-help" class="edit-help">Help goes here.<br/>Blat<br/>Blah.<br/>Boo</div>
+  <div id="page-edit-help" class="edit-help" style="display:none">Help goes here.<br/>Blat<br/>Blah.<br/>Boo</div>
   <div id="wmd-preview" class="wmd-preview" style="display:none"></div>
 
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>
