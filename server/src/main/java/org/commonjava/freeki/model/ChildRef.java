@@ -6,7 +6,7 @@ public class ChildRef
 
     public enum ChildType
     {
-        PAGE, GROUP;
+        GROUP, PAGE;
     }
 
     private ChildType type;
@@ -54,10 +54,10 @@ public class ChildRef
     @Override
     public int compareTo( final ChildRef other )
     {
-        int comp = type.compareTo( other.type );
+        int comp = label.compareTo( other.label );
         if ( comp == 0 )
         {
-            comp = label.compareTo( other.label );
+            comp = type.compareTo( other.type );
         }
 
         return comp;

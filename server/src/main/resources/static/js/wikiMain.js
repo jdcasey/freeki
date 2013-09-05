@@ -19,6 +19,7 @@ function init( url, parent, groupName ){
 	if ( mdPane ){
 		converter = new Markdown.Converter();
 		converter.hooks.chain("preConversion", function (text) {
+//			alert("Changed to: " + text );
 			editingPageContent = text;
 		  return text;
 		});
@@ -39,6 +40,10 @@ function init( url, parent, groupName ){
 		
 		if ( window.location.hash == '#editing' ){
 			$('#edit-page').click();
+		}
+		else
+		{
+			$('#cancel-edit').click();
 		}
 	}
 }
@@ -71,7 +76,7 @@ $('#cancel-edit').click(function(){
 });
 
 $('#save-edit').click(function(){
-//  pageContent = $('#wmd-input').text();
+//	alert( "Updated content:\n\n" + editingPageContent );
   
   $.post(myUrl, editingPageContent, function(data, textStatus){
       pageContent = editingPageContent;

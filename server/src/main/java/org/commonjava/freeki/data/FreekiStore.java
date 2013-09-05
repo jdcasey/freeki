@@ -285,7 +285,8 @@ public class FreekiStore
     private File getFileById( final String group, final String id )
     {
         final File root = config.getStorageDir();
-        final File groupDir = new File( root, group );
+        logger.info( "Calculating file from base: %s, group: %s, page-id: %s", root, group, id );
+        final File groupDir = group.length() < 1 || group.equals( "/" ) ? root : new File( root, group );
         return id == null ? groupDir : new File( groupDir, id + ".md" );
     }
 
@@ -519,6 +520,8 @@ public class FreekiStore
     public PlotCommit<PlotLane> getHeadCommit( final File f )
         throws Exception
     {
+        logger.info( "Resolving HEAD commit for: %s", f );
+
         final ObjectId oid = repo.resolve( "HEAD" );
         final PlotWalk pw = new PlotWalk( repo );
         final RevCommit rc = pw.parseCommit( oid );
