@@ -7,6 +7,7 @@ import static org.apache.commons.io.FileUtils.write;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -103,8 +104,19 @@ public class FreekiStore
         username = repo.getConfig()
                        .getString( "user", null, "name" );
 
+        if ( username == null )
+        {
+            username = System.getProperty( "user.name" );
+        }
+
         email = repo.getConfig()
                     .getString( "user", null, "email" );
+
+        if ( email == null )
+        {
+            email = username + "@" + InetAddress.getLocalHost()
+                                                .getCanonicalHostName();
+        }
 
         if ( create )
         {
