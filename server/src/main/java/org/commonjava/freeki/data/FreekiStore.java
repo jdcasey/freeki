@@ -5,6 +5,7 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.io.FileUtils.write;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.InetAddress;
@@ -47,6 +48,16 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 public class FreekiStore
 {
+
+    public class ValidChildrenFilenameFilter
+        implements FilenameFilter
+    {
+        @Override
+        public boolean accept( final File dir, final String name )
+        {
+            return name.endsWith( ".md" ) || new File( dir, name ).isDirectory();
+        }
+    }
 
     private static final CharSequence README = "This is a marker file for a freeki content group. You can add pages to this group through the UI.";
 
@@ -164,7 +175,7 @@ public class FreekiStore
         if ( d.isDirectory() )
         {
             logger.info( "Listing children in directory: %s\n", d );
-            final File[] files = d.listFiles();
+            final File[] files = d.listFiles( new ValidChildrenFilenameFilter() );
 
             for ( final File file : files )
             {
@@ -185,12 +196,18 @@ public class FreekiStore
                 {
                     try
                     {
-                        final String fname = file.getName();
+                        String fname = file.getName();
+                        fname = fname.substring( 0, fname.length() - 3 );
+
                         final String content = FileUtils.readFileToString( file );
                         final Map<String, String> metadata = getMetadata( content, false );
-                        final String title = metadata.get( MD_TITLE );
+                        String title = metadata.get( MD_TITLE );
+                        if ( title == null )
+                        {
+                            title = fname;
+                        }
 
-                        result.add( new ChildRef( ChildType.PAGE, title, fname.substring( 0, fname.length() - 3 ) ) );
+                        result.add( new ChildRef( ChildType.PAGE, title, fname ) );
                     }
                     catch ( final Exception e )
                     {
@@ -289,9 +306,9 @@ public class FreekiStore
         return getFileById( id, null );
     }
 
-    private File getFileByTitle( final String pathBase, final String title )
+    private File getFileByTitle( final String group, final String title )
     {
-        return getFileById( pathBase, title == null ? null : Page.idFor( title ) );
+        return getFileById( title == null ? group : Page.serverPathFor( group, title ), null );
     }
 
     private File getFileById( final String group, final String id )

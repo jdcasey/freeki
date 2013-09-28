@@ -140,14 +140,23 @@ public class PageContentHandler
                     //                    logger.info( "Received content:\n\n%s\n\n", content );
 
                     String title = page;
+                    boolean titleParsed = false;
 
                     final BufferedReader reader = new BufferedReader( new StringReader( content.toString() ) );
-                    final String firstLine = reader.readLine();
+                    String firstLine = null;
+                    do
+                    {
+                        firstLine = reader.readLine();
+                    }
+                    while ( firstLine.trim()
+                                     .length() < 1 );
+
                     if ( firstLine != null && firstLine.length() > 0 )
                     {
                         if ( firstLine.startsWith( "# " ) )
                         {
                             title = firstLine.substring( 2 );
+                            titleParsed = true;
                         }
                         else
                         {
@@ -155,6 +164,7 @@ public class PageContentHandler
                             if ( secondLine != null && secondLine.matches( "[=]+" ) )
                             {
                                 title = firstLine;
+                                titleParsed = true;
                             }
                         }
                     }
@@ -165,17 +175,19 @@ public class PageContentHandler
                     if ( pageObj == null )
                     {
                         pageObj =
-                            new Page( group, Page.serverPathFor( group, page ), content.toString(), title,
-                                      System.currentTimeMillis(), "unknown" );
+                            new Page( group, Page.serverPathFor( group, page ), content.toString(), title, System.currentTimeMillis(), "unknown" );
                     }
                     else
                     {
                         //                        logger.info( "Setting content:\n\n%s\n\n", content );
                         pageObj.setContent( content.toString() );
                         pageObj.setUpdated( new Date() );
-                        if ( pageObj.getTitle() == null )
+                        //                        if ( pageObj.getTitle() == null )
+                        //                        {
+                        if ( titleParsed )
                         {
                             pageObj.setTitle( title );
+                            //                        }
                         }
                     }
 

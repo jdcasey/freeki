@@ -1,6 +1,6 @@
 package org.commonjava.freeki.model;
 
-import static org.commonjava.freeki.util.UrlUtils.buildUrl;
+import static org.commonjava.freeki.util.PathUtils.buildPath;
 
 import java.io.StringReader;
 import java.net.MalformedURLException;
@@ -380,25 +380,24 @@ public class Page
     }
 
     public static String serverPathFor( final String group, final String title )
-        throws MalformedURLException
     {
         if ( title == null )
         {
             return null;
         }
 
-        return buildUrl( false, group, idFor( title ) );
+        return buildPath( group, idFor( title ) );
     }
 
     public static String idFor( final String title )
     {
-        if ( title == null )
-        {
-            return null;
-        }
-
-        return title.toLowerCase()
-                    .replaceAll( "[^-_a-zA-Z0-9]+", "-" );
+        return title;
+        //        if ( title == null )
+        //        {
+        //            return null;
+        //        }
+        //
+        //        return title.replaceAll( "[^-_a-zA-Z0-9]+", "-" );
     }
 
     public String getId()

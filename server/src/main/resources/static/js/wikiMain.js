@@ -76,7 +76,7 @@ $('#cancel-edit').click(function(){
 });
 
 $('#save-edit').click(function(){
-//	alert( "Updated content:\n\n" + editingPageContent );
+	alert( "Updated content:\n\n" + editingPageContent );
   
   $.post(myUrl, editingPageContent, function(data, textStatus){
       pageContent = editingPageContent;
@@ -150,13 +150,13 @@ $('#group-new-cancel').click(function(){
 $('#group-new-submit').click(function(){
 	var title = $('#group-new-title').val();
 	if ( $('#group-new-grouptype').prop('checked') ){
-		createGroup();
+		createGroup(title);
 	}
 	else if ($('#group-new-template').prop('checked') ){
 		showTemplateForm();
 	}
 	else{
-		createPage();
+		createPage(title);
 	}
 });
 
@@ -168,7 +168,7 @@ $('#template-form-cancel').click(function(){
 	$('#template-panel').dialog("destroy");
 });
 
-function createGroup(){
+function createGroup(title){
 	$.ajax({
 		type: 'POST',
 		url: "/api/group/" + group + "/" + title,
@@ -186,7 +186,7 @@ function createGroup(){
 	});
 }
 
-function createPage(){
+function createPage(title){
 	$.ajax({
 		type: 'POST',
 		url: "/api/page/" + group + "/" + title,
