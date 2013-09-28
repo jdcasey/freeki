@@ -19,9 +19,12 @@ public final class PathUtils
 
         final StringBuilder builder = new StringBuilder();
 
-        if ( parts[0] == null || !parts[0].startsWith( basePath ) )
+        if ( basePath != null && basePath.length() > 0 && !"/".equals( basePath ) )
         {
-            builder.append( basePath );
+            if ( parts[0] == null || !parts[0].startsWith( basePath ) )
+            {
+                builder.append( basePath );
+            }
         }
 
         for ( String part : parts )

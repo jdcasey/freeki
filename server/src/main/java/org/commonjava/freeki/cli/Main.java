@@ -26,6 +26,7 @@ import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
 import org.commonjava.freeki.rest.StaticContentHandler;
 import org.commonjava.freeki.rest.TemplateContentHandler;
+import org.commonjava.freeki.rest.UpdateNotificationHandler;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.web.json.ser.JsonSerializer;
 import org.kohsuke.args4j.CmdLineException;
@@ -117,8 +118,8 @@ public class Main
         setVertx( v );
 
         final FreekiConfig mainConf =
-            opts.getContentDir() == null ? new FreekiConfig()
-                            : new FreekiConfig( opts.getContentDir(), opts.getBrandingDir(), opts.getTemplatesDir() );
+            opts.getContentDir() == null ? new FreekiConfig() : new FreekiConfig( opts.getContentDir(), opts.getBrandingDir(), opts.getStaticDir(),
+                                                                                  opts.getTemplatesDir() );
 
         final FreekiStore store = new FreekiStore( mainConf );
 
@@ -147,6 +148,7 @@ public class Main
                 add( new GroupContentHandler( store, engine ) );
                 add( new PageContentHandler( store, engine ) );
                 add( new StaticContentHandler( mainConf ) );
+                add( new UpdateNotificationHandler( store ) );
                 add( new TemplateContentHandler( new TemplateController( store, mainConf ), serializer ) );
             }
         };

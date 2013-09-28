@@ -52,6 +52,7 @@ public class Page
         this.title = title;
         this.currentAuthor = author;
         this.id = serverPathFor( group, pageName );
+        //        logger.info( "id for '%s' is: '%s'", title, id );
     }
 
     public Map<String, String> getMetadata()

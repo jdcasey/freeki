@@ -23,6 +23,9 @@ public class CliOptions
     @Option( name = "-b", aliases = "--branding", usage = "Branding content directory (default: $HOME/freeki/.branding)" )
     private File brandingDir;
 
+    @Option( name = "-s", aliases = "--static", usage = "Static content directory (default: $HOME/freeki/.branding/static)" )
+    private File staticDir;
+
     @Option( name = "-t", aliases = "--templates", usage = "Templates directory (default: $HOME/freeki/.templates)" )
     private File templatesDir;
 
@@ -84,6 +87,16 @@ public class CliOptions
     public void setTemplatesDir( final File templatesDir )
     {
         this.templatesDir = templatesDir;
+    }
+
+    public File getStaticDir()
+    {
+        return staticDir;
+    }
+
+    public void setStaticDir( final File staticDir )
+    {
+        this.staticDir = staticDir;
     }
 
 }

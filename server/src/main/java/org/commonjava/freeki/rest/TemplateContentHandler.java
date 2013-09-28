@@ -11,7 +11,6 @@ import org.commonjava.freeki.infra.route.Method;
 import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.infra.route.anno.Route;
 import org.commonjava.freeki.infra.route.anno.Routes;
-import org.commonjava.util.logging.Logger;
 import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.json.ser.JsonSerializer;
 import org.vertx.java.core.VoidHandler;
@@ -21,7 +20,7 @@ public class TemplateContentHandler
     implements RouteHandler
 {
 
-    private final Logger logger = new Logger( getClass() );
+    //    private final Logger logger = new Logger( getClass() );
 
     private final TemplateController controller;
 
@@ -63,7 +62,7 @@ public class TemplateContentHandler
         final String template = req.params()
                                    .get( PathParameter.TEMPLATE.param() );
 
-        logger.info( "Loading HTML form for template: '%s'\nURI: '%s'", template, req.absoluteURI() );
+        //        logger.info( "Loading HTML form for template: '%s'\nURI: '%s'", template, req.absoluteURI() );
         final File html = controller.getTemplateHtml( template );
         if ( !html.exists() )
         {
@@ -104,7 +103,7 @@ public class TemplateContentHandler
                     final String key = entry.getKey();
                     if ( !params.containsKey( key ) )
                     {
-                        logger.info( "PARAMS+ (path) %s = %s", key, entry.getValue() );
+                        //                        logger.info( "PARAMS+ (path) %s = %s", key, entry.getValue() );
                         params.put( key, entry.getValue() );
                     }
                 }
@@ -114,7 +113,7 @@ public class TemplateContentHandler
                     final String key = entry.getKey();
                     if ( !params.containsKey( key ) )
                     {
-                        logger.info( "PARAMS+ (form) %s = %s", key, entry.getValue() );
+                        //                        logger.info( "PARAMS+ (form) %s = %s", key, entry.getValue() );
                         params.put( key, entry.getValue() );
                     }
                 }

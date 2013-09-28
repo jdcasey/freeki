@@ -1,6 +1,5 @@
 package org.commonjava.freeki.rest;
 
-import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.freeki.rest.PathParameter.DIR;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
@@ -164,9 +163,16 @@ public class GroupContentHandler
         try
         {
             final Group group = store.getGroup( dir );
-            logger.info( "Got group with %d children:\n\n  %s\n\n", group.getChildren()
-                                                                         .size(), join( group.getChildren(), "\n  " ) );
+            //            logger.info( "Got group with %d children:\n\n  %s\n\n", group.getChildren()
+            //                                                                         .size(), join( group.getChildren(), "\n  " ) );
             final String rendered = engine.render( group, type );
+
+            if ( type != null )
+            {
+                req.response()
+                   .headers()
+                   .add( "Content-Type", type.value() );
+            }
 
             req.response()
                .end( rendered );

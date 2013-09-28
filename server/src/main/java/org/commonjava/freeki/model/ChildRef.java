@@ -54,6 +54,15 @@ public class ChildRef
     @Override
     public int compareTo( final ChildRef other )
     {
+        if ( "README".equals( label ) )
+        {
+            return -1;
+        }
+        else if ( "README".equals( other.label ) )
+        {
+            return 1;
+        }
+
         int comp = label.compareTo( other.label );
         if ( comp == 0 )
         {

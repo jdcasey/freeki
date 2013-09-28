@@ -10,6 +10,8 @@ var group;
 
 function init( url, parent, groupName ){
 	myUrl = url;
+//	alert( "myUrl is: " + myUrl );
+	
 	parentUrl = parent;
 	group = groupName;
 	
@@ -76,7 +78,7 @@ $('#cancel-edit').click(function(){
 });
 
 $('#save-edit').click(function(){
-	alert( "Updated content:\n\n" + editingPageContent );
+//	alert( "Updated content:\n\n" + editingPageContent );
   
   $.post(myUrl, editingPageContent, function(data, textStatus){
       pageContent = editingPageContent;

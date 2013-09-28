@@ -106,8 +106,8 @@ public class PageContentHandler
     @Routes( {
        @Route( path="/api/page/:page", method=Method.PUT, contentType="text/plain" ), 
        @Route( path="/api/page/:page", method=Method.POST, contentType="text/plain" ), 
-       @Route( path="/api/page/:dir=(.*)/:page", method=Method.PUT, contentType="text/plain" ), 
-       @Route( path="/api/page/:dir=(.*)/:page", method=Method.POST, contentType="text/plain" ) 
+       @Route( path="/api/page/:dir=(.*/)?:page", method=Method.PUT, contentType="text/plain" ), 
+       @Route( path="/api/page/:dir=(.*/)?:page", method=Method.POST, contentType="text/plain" ) 
     } )
     /* @formatter:on */
     public void store( final HttpServerRequest req )
@@ -252,8 +252,8 @@ public class PageContentHandler
             dir = "/";
         }
 
-        logger.info( "Page: %s\n", page );
-        logger.info( "Dir: %s\n", dir );
+        //        logger.info( "Page: %s\n", page );
+        //        logger.info( "Dir: %s\n", dir );
 
         String mimeAccept = req.headers()
                                .get( RouteBinding.RECOMMENDED_CONTENT_TYPE );
@@ -274,10 +274,17 @@ public class PageContentHandler
         try
         {
             final Page pg = store.getPage( dir, page );
-            //            logger.info( "Got page: %s\n", pg );
+            //            logger.info( "Got page: %s\n", pg.getId() );
             final String rendered = engine.render( pg, type );
 
             //            logger.info( "Rendered to:\n\n%s\n\n", rendered );
+
+            if ( type != null )
+            {
+                req.response()
+                   .headers()
+                   .add( "Content-Type", type.value() );
+            }
 
             req.response()
                .end( rendered );

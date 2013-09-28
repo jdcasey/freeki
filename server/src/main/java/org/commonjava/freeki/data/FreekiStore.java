@@ -174,17 +174,17 @@ public class FreekiStore
         final SortedSet<ChildRef> result = new TreeSet<ChildRef>();
         if ( d.isDirectory() )
         {
-            logger.info( "Listing children in directory: %s\n", d );
+            //            logger.info( "Listing children in directory: %s\n", d );
             final File[] files = d.listFiles( new ValidChildrenFilenameFilter() );
 
             for ( final File file : files )
             {
                 final String name = file.getName();
-                logger.info( name );
+                //                logger.info( name );
 
                 if ( name.startsWith( "." ) )
                 {
-                    logger.info( "Skipping: %s\n", name );
+                    //                    logger.info( "Skipping: %s\n", name );
                     continue;
                 }
 
@@ -296,7 +296,7 @@ public class FreekiStore
 
         write( pageFile, content );
 
-        addAndCommit( pageFile, ( update ? "Updating" : "Creating" ) );
+        addAndCommit( pageFile, ( update ? "Updating: " : "Creating: " ) + page.getTitle() );
 
         return !update;
     }
@@ -314,7 +314,7 @@ public class FreekiStore
     private File getFileById( final String group, final String id )
     {
         final File root = config.getStorageDir();
-        logger.info( "Calculating file from base: %s, group: %s, page-id: %s", root, group, id );
+        //        logger.info( "Calculating file from base: %s, group: %s, page-id: %s", root, group, id );
         final File groupDir = group.length() < 1 || group.equals( "/" ) ? root : new File( root, group );
         return id == null ? groupDir : new File( groupDir, id + ".md" );
     }
@@ -614,5 +614,20 @@ public class FreekiStore
 
         final SortedSet<ChildRef> pages = listChildren( groupName );
         return new Group( groupName, pages );
+    }
+
+    public void pullUpdates()
+        throws IOException
+    {
+        try
+        {
+            git.pull()
+               .setRebase( true )
+               .call();
+        }
+        catch ( final GitAPIException e )
+        {
+            throw new IOException( "Cannot update content via git: " + e.getMessage(), e );
+        }
     }
 }

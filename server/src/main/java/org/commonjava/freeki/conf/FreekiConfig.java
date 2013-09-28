@@ -13,9 +13,13 @@ public class FreekiConfig
 
     public static final String DEFAULT_TEMPLATE_SUBPATH = ".templates";
 
+    public static final String DEFAULT_STATIC_SUBPATH = "static";
+
     private File storageDir;
 
     private File brandingDir;
+
+    private File staticDir;
 
     private File templatesDir;
 
@@ -25,13 +29,14 @@ public class FreekiConfig
 
     public FreekiConfig( final File storageDir )
     {
-        this( storageDir, null, null );
+        this( storageDir, null, null, null );
     }
 
-    public FreekiConfig( final File storageDir, final File brandingDir, final File templatesDir )
+    public FreekiConfig( final File storageDir, final File brandingDir, final File staticDir, final File templatesDir )
     {
         this.storageDir = storageDir;
         this.brandingDir = brandingDir;
+        this.staticDir = staticDir;
         this.templatesDir = templatesDir;
     }
 
@@ -63,6 +68,16 @@ public class FreekiConfig
     public void setTemplatesDir( final File templatesDir )
     {
         this.templatesDir = templatesDir;
+    }
+
+    public File getStaticDir()
+    {
+        return staticDir == null ? new File( getBrandingDir(), DEFAULT_STATIC_SUBPATH ) : staticDir;
+    }
+
+    public void setStaticDir( final File staticDir )
+    {
+        this.staticDir = staticDir;
     }
 
 }
