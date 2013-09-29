@@ -15,17 +15,22 @@ public class GTemplateConfig
 
     private Map<ContentKey, String> templates;
 
-    private final File brandingDir;
+    private final FreekiConfig config;
 
-    public GTemplateConfig( final Map<String, String> rawTemplateMap, final File brandingDir )
+    public GTemplateConfig( final Map<String, String> rawTemplateMap, final FreekiConfig config )
     {
-        this.brandingDir = brandingDir;
+        this.config = config;
         parseRawTemplateMap( rawTemplateMap );
     }
 
     public File getBrandingDir()
     {
-        return brandingDir;
+        return config.getBrandingDir();
+    }
+
+    public boolean isReadOnly()
+    {
+        return config.isReadOnly();
     }
 
     public String getTemplate( final ContentType type, final String renderKey )

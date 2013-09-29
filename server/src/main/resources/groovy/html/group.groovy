@@ -41,7 +41,7 @@ if ( path.length > 0 ){
   </ul>
 </div>
 <% } %>
-
+<% if( !readOnly ){ %>
 <div id="buttonbar-group-view" class="buttonbar">
   <button id="group-new-form-trigger">New...</button>
   <button id="delete-group">Delete</button>
@@ -64,7 +64,7 @@ if ( path.length > 0 ){
     </div>
   </form>
 </div>
-
+<% } %>
 <footer class="group-footer">
   <div class="generated-on">
   <span style="font-size: small;">
@@ -79,6 +79,7 @@ if ( path.length > 0 ){
 </div>
 </footer>
 
+<% if (!readOnly){ %>
 <!-- hidden panels -->
   <div id="template-panel" style="display:none">
     <form id="template-form">
@@ -95,6 +96,7 @@ if ( path.length > 0 ){
       init('/api/group/${data.name}', '/wiki/${data.parent}/', '${data.name}' );
     });
   </script>
+ <% } %>
   <script type="text/javascript" src="/static/js/branding.js"></script>
   <script type="text/javascript" src="/static/js/group-extras.js"></script>
 </body>

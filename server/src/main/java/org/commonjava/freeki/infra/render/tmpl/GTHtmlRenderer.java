@@ -56,6 +56,7 @@ public class GTHtmlRenderer
         {
             final Map<String, Object> map = new HashMap<String, Object>();
             map.put( "data", data );
+            map.put( "readOnly", config.isReadOnly() );
 
             final String ct = getContentTemplate( data );
             String content;

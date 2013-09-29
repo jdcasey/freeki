@@ -13,6 +13,7 @@ import org.commonjava.freeki.conf.FreekiConfig;
 import org.commonjava.freeki.conf.GTemplateConfig;
 import org.commonjava.freeki.data.FreekiStore;
 import org.commonjava.freeki.data.TemplateController;
+import org.commonjava.freeki.infra.auth.Authorizer;
 import org.commonjava.freeki.infra.render.ContentRenderer;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.json.JsonRenderer;
@@ -52,12 +53,12 @@ public class Main
 
     private boolean canStart = false;
 
-    private final CliOptions opts;
+    private final FreekiConfig config;
 
     public Main( final String[] args )
     {
-        opts = new CliOptions();
-        final CmdLineParser parser = new CmdLineParser( opts );
+        config = new FreekiConfig();
+        final CmdLineParser parser = new CmdLineParser( config );
         try
         {
             parser.parseArgument( args );
@@ -69,7 +70,7 @@ public class Main
             printUsage( parser, e );
         }
 
-        if ( opts.isHelp() )
+        if ( config.isHelp() )
         {
             printUsage( parser, null );
             canStart = false;
@@ -117,11 +118,7 @@ public class Main
         final Vertx v = new DefaultVertx();
         setVertx( v );
 
-        final FreekiConfig mainConf =
-            opts.getContentDir() == null ? new FreekiConfig() : new FreekiConfig( opts.getContentDir(), opts.getBrandingDir(), opts.getStaticDir(),
-                                                                                  opts.getTemplatesDir() );
-
-        final FreekiStore store = new FreekiStore( mainConf );
+        final FreekiStore store = new FreekiStore( config );
 
         final Map<String, String> rawTemplateConf = new HashMap<>();
         rawTemplateConf.put( "group@" + ContentType.TEXT_HTML.value(), "groovy/html/group.groovy" );
@@ -129,7 +126,7 @@ public class Main
         rawTemplateConf.put( "group@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/group.groovy" );
         rawTemplateConf.put( "page@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/page.groovy" );
 
-        final GTemplateConfig templateConfig = new GTemplateConfig( rawTemplateConf, mainConf.getBrandingDir() );
+        final GTemplateConfig templateConfig = new GTemplateConfig( rawTemplateConf, config );
 
         final Set<ContentRenderer> renderers = new HashSet<>();
         renderers.add( new GTHtmlRenderer( templates, proc, templateConfig ) );
@@ -139,17 +136,18 @@ public class Main
         renderers.add( new JsonRenderer( serializer ) );
 
         final RenderingEngine engine = new RenderingEngine( renderers );
+        final Authorizer authorizer = new Authorizer( config );
 
         final Set<RouteHandler> handlers = new HashSet<RouteHandler>()
         {
             private static final long serialVersionUID = 1L;
 
             {
-                add( new GroupContentHandler( store, engine ) );
-                add( new PageContentHandler( store, engine ) );
-                add( new StaticContentHandler( mainConf ) );
+                add( new GroupContentHandler( store, engine, authorizer ) );
+                add( new PageContentHandler( store, engine, authorizer ) );
+                add( new StaticContentHandler( config ) );
                 add( new UpdateNotificationHandler( store ) );
-                add( new TemplateContentHandler( new TemplateController( store, mainConf ), serializer ) );
+                add( new TemplateContentHandler( new TemplateController( store, config ), serializer ) );
             }
         };
 
@@ -157,12 +155,12 @@ public class Main
         final ApplicationRouter router = new ApplicationRouter( handlers, collections );
         router.noMatch( new OopsHandler( proc ) );
 
-        final String listen = opts.getListen();
+        final String listen = config.getListen();
         vertx.createHttpServer()
              .requestHandler( router )
-             .listen( opts.getPort(), listen );
+             .listen( config.getPort(), listen );
 
-        System.out.printf( "Listening for requests on %s:%s\n\n", opts.getListen(), opts.getPort() );
+        System.out.printf( "Listening for requests on %s:%s\n\n", config.getListen(), config.getPort() );
 
         synchronized ( this )
         {

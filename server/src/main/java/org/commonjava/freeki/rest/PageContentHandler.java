@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.commonjava.freeki.data.FreekiStore;
+import org.commonjava.freeki.infra.auth.Authorizer;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.infra.route.Method;
@@ -51,10 +52,13 @@ public class PageContentHandler
 
     private final Logger logger = new Logger( getClass() );
 
-    public PageContentHandler( final FreekiStore store, final RenderingEngine engine )
+    private final Authorizer auth;
+
+    public PageContentHandler( final FreekiStore store, final RenderingEngine engine, final Authorizer authorizer )
     {
         this.store = store;
         this.engine = engine;
+        this.auth = authorizer;
     }
 
     /* @formatter:off */
@@ -65,6 +69,11 @@ public class PageContentHandler
     public void delete( final HttpServerRequest req )
         throws Exception
     {
+        if ( auth.checkReadOnly( req ) )
+        {
+            return;
+        }
+
         String dir = req.params()
                         .get( DIR.param() );
 
@@ -113,6 +122,11 @@ public class PageContentHandler
     public void store( final HttpServerRequest req )
         throws Exception
     {
+        if ( auth.checkReadOnly( req ) )
+        {
+            return;
+        }
+
         String dir = req.params()
                         .get( DIR.param() );
 

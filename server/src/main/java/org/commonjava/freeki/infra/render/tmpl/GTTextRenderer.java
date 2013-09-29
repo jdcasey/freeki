@@ -69,6 +69,7 @@ public class GTTextRenderer
 
             final Map<String, Object> map = new HashMap<String, Object>();
             map.put( "data", data );
+            map.put( "readOnly", config.isReadOnly() );
 
             final Writable output = template.make( map );
 

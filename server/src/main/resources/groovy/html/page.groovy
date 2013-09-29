@@ -21,6 +21,11 @@
 <a class="breadcrumb-root breadcrumb" href="${last}">Wiki Root</a><span class="breadcrumb-sep">/</span><% data.group.split('/').each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% } %>
 </div>
 <div id="page-main" class="main-content">
+<% if(readOnly){ %>
+<div id="page-content">
+  ${rendered}
+</div>
+<% } else { %>
 <div id="page-content">
 </div>
 <div id="buttonbar-edit-page" class="buttonbar">
@@ -50,6 +55,7 @@ ${data.content}
     <button id="delete-edit">Delete</button>
   </div>
 </div>
+<% } %>
 
   <footer id="page-footer">
     <div class="generated-on">
@@ -64,6 +70,7 @@ ${data.content}
     </div>
   </footer>
 
+<% if ( !readOnly ){ %>
 <!-- hidden panels -->
   <div id="page-edit-help" class="edit-help" style="display:none">Help goes here.<br/>Blat<br/>Blah.<br/>Boo</div>
   <div id="wmd-preview" class="wmd-preview" style="display:none"></div>
@@ -74,6 +81,7 @@ ${data.content}
       init('/api/page/${data.id}', '/wiki/${data.group}/', '${data.group}' );
     });
   </script>
+<% } %>
   <script type="text/javascript" src="/static/js/branding.js"></script>
   <script type="text/javascript" src="/static/js/page-extras.js"></script>
 </body>

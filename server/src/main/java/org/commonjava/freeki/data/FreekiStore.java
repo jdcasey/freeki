@@ -100,11 +100,11 @@ public class FreekiStore
     public void setupGit()
         throws IOException
     {
-        basepathLength = config.getStorageDir()
+        basepathLength = config.getContentDir()
                                .getPath()
                                .length() + 1;
 
-        final File gitDir = new File( config.getStorageDir(), ".git" );
+        final File gitDir = new File( config.getContentDir(), ".git" );
         final boolean create = !gitDir.isDirectory();
 
         final FileRepositoryBuilder builder = new FileRepositoryBuilder().setGitDir( gitDir )
@@ -139,7 +139,7 @@ public class FreekiStore
 
     public boolean hasGroup( final String group )
     {
-        final File root = config.getStorageDir();
+        final File root = config.getContentDir();
         final File d = new File( root, group );
 
         return d.isDirectory();
@@ -168,7 +168,7 @@ public class FreekiStore
 
     public SortedSet<ChildRef> listChildren( final String group )
     {
-        final File root = config.getStorageDir();
+        final File root = config.getContentDir();
         final File d = new File( root, group );
 
         final SortedSet<ChildRef> result = new TreeSet<ChildRef>();
@@ -313,7 +313,7 @@ public class FreekiStore
 
     private File getFileById( final String group, final String id )
     {
-        final File root = config.getStorageDir();
+        final File root = config.getContentDir();
         //        logger.info( "Calculating file from base: %s, group: %s, page-id: %s", root, group, id );
         final File groupDir = group.length() < 1 || group.equals( "/" ) ? root : new File( root, group );
         return id == null ? groupDir : new File( groupDir, id + ".md" );
@@ -445,7 +445,7 @@ public class FreekiStore
         File file = getFileById( group, id );
         if ( file == null )
         {
-            file = new File( config.getStorageDir(), group );
+            file = new File( config.getContentDir(), group );
         }
 
         final Set<File> deleted = new HashSet<File>();
@@ -463,7 +463,7 @@ public class FreekiStore
         }
 
         // TODO: Will file.isDirectory() return true if it was just deleted, above??
-        while ( file.isDirectory() && !config.getStorageDir()
+        while ( file.isDirectory() && !config.getContentDir()
                                              .equals( file ) && file.list().length < 1 )
         {
             file.delete();
@@ -573,7 +573,7 @@ public class FreekiStore
     public SortedSet<Group> listGroups( final String subgroup )
         throws IOException
     {
-        final File root = config.getStorageDir();
+        final File root = config.getContentDir();
         File dir = root;
         if ( subgroup != null )
         {
@@ -605,7 +605,7 @@ public class FreekiStore
             return null;
         }
 
-        final File groupDir = new File( config.getStorageDir(), groupName );
+        final File groupDir = new File( config.getContentDir(), groupName );
 
         if ( !groupDir.isDirectory() )
         {
