@@ -44,7 +44,7 @@ if (!contentOnly){
 </div>
 <div id="page-breadcrumbs" class="breadcrumbs">
 <% def last = '/wiki/' %>
-<a class="breadcrumb-root breadcrumb" href="${last}">Wiki Root</a><span class="breadcrumb-sep">/</span><% data.group.split('/').each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% } %>
+<a class="breadcrumb-root breadcrumb" href="${last}">(Root)</a><span class="breadcrumb-sep">/</span><% data.group.split('/').each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% } %>
 </div>
 <% } %>
 <div id="page-main" class="main-content">
