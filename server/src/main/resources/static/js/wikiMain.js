@@ -25,12 +25,24 @@ var myUrl;
 var parentUrl;
 var group;
 
-function init( url, parent, groupName ){
+var readonly;
+
+function init( url, parent, groupName, readOnly ){
 	myUrl = url;
+	readonly = readOnly;
 //	alert( "myUrl is: " + myUrl );
 	
 	parentUrl = parent;
 	group = groupName;
+	
+	$('div.embedded-content').each(function(){
+		var pg = $(this).attr('page').replace(' ', '%20');
+		if(group != '/' ){
+			pg = group + '/' + pg;
+		}
+		
+		$(this).load('/wiki/' + pg + '?format=content-only' );
+	});
 	
 	$('#editor-content').tabs();
 	
@@ -68,6 +80,8 @@ function init( url, parent, groupName ){
 }
 
 $('.preview-button').click(function(){
+	if ( readonly ){return;}
+	
 	// bit non-obvious, but pagedown updates this pane in realtime, so we pull
 	// the html from there to display in our own preview pane. This wmd preview
 	// pane is display:none to suppress it in favor of our own.
@@ -78,6 +92,8 @@ $('.preview-button').click(function(){
 });
 
 $('#edit-page').click(function(){
+	if ( readonly ){return;}
+	
   $('#page-content').hide();
   
   $('#buttonbar-edit-page').hide();
@@ -88,6 +104,8 @@ $('#edit-page').click(function(){
 });
 
 $('#cancel-edit').click(function(){
+	if ( readonly ){return;}
+	
   $('#page-edit').hide();
   window.location.hash = null;
   $('#page-content').show();
@@ -95,6 +113,8 @@ $('#cancel-edit').click(function(){
 });
 
 $('#save-edit').click(function(){
+	if ( readonly ){return;}
+	
 //	alert( "Updated content:\n\n" + editingPageContent );
   
   $.post(myUrl, editingPageContent, function(data, textStatus){
@@ -111,6 +131,8 @@ $('#save-edit').click(function(){
 });
 
 $('#delete-page,#delete-edit,#delete-group').click(function(){
+	if ( readonly ){return;}
+	
 	if( confirm( "Really delete?" ) ){
 		$.ajax({
 			type: 'delete',
@@ -127,10 +149,14 @@ $('#delete-page,#delete-edit,#delete-group').click(function(){
 });
 
 $('#group-new-form-trigger').click(function(){
+	if ( readonly ){return;}
+	
 	$('#group-new-panel').toggle();
 });
 
 $('#group-new-template').click(function(){
+	if ( readonly ){return;}
+	
 	$.ajax({
 		type: 'get',
 		url: '/templates',
@@ -160,6 +186,8 @@ $('#group-new-form').submit(function(){
 });
 
 $('#group-new-cancel').click(function(){
+	if ( readonly ){return;}
+	
 	$('#group-new-panel').hide();
 	$('#group-new-title').text('');
 	$('#group-new-grouptype').attr('checked', 'true')
@@ -167,6 +195,8 @@ $('#group-new-cancel').click(function(){
 });
 
 $('#group-new-submit').click(function(){
+	if ( readonly ){return;}
+	
 	var title = $('#group-new-title').val();
 	if ( $('#group-new-grouptype').prop('checked') ){
 		createGroup(title);
@@ -180,14 +210,20 @@ $('#group-new-submit').click(function(){
 });
 
 $('#template-form-submit').click(function(){
+	if ( readonly ){return;}
+	
 	$('#template-form').submit();
 });
 
 $('#template-form-cancel').click(function(){
+	if ( readonly ){return;}
+	
 	$('#template-panel').dialog("destroy");
 });
 
 function createGroup(title){
+	if ( readonly ){return;}
+	
 	$.ajax({
 		type: 'POST',
 		url: "/api/group/" + group + "/" + title,
@@ -206,6 +242,8 @@ function createGroup(title){
 }
 
 function createPage(title){
+	if ( readonly ){return;}
+	
 	$.ajax({
 		type: 'POST',
 		url: "/api/page/" + group + "/" + title,
@@ -225,6 +263,8 @@ function createPage(title){
 }
 
 function showTemplateForm(){
+	if ( readonly ){return;}
+	
 	var template = $('#templates-list').prop('value');
 	var templateFormUrl = '/templates/' + template;
 	

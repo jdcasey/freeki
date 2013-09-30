@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
+def mainPages = [ 'Overview', 'Index', 'Main', 'README' ]
+ 
 def last = '/wiki/'
 def path = data.name.split('/')
 def me = path.length > 0 ? path[path.length-1] : 'Wiki Root'
@@ -22,7 +24,22 @@ if ( path.length > 0 ){
   def newpath = new String[path.length-1]
   System.arraycopy(path,0,newpath,0,path.length-1)
   path = newpath
-} %>
+}
+
+def mainPg;
+if ( data.children ){
+  data.children.find {
+    if (it.type.name().equals("PAGE") && mainPages.contains(it.label) ){
+      System.out.println( "Found main page: ${it.label}" )
+      mainPg = it.id
+      return true
+    }
+    
+    System.out.println("NOT main: ${it.label}")
+    return false
+  }
+}
+%>
 <html>
   <head>
   <title>${me}</title>
@@ -34,6 +51,7 @@ if ( path.length > 0 ){
     
     <link rel="stylesheet" href="/static/css/jquery-ui.css"/>
     <link rel="stylesheet" href="/static/css/pagedown.css"/>
+    <link rel="stylesheet" href="/static/css/wikiMain.css"/>
     <link rel="stylesheet" href="/static/css/branding.css"/>
   </head>
 <body>
@@ -41,27 +59,35 @@ if ( path.length > 0 ){
   <span class="freeki-plug">Look, another <a target="_new" href="https://github.com/jdcasey/freeki">Freeki</a> portable wiki!</span>
 </div>
 <div id="group-header-panel">
-  <span id="group-name"><% if (me == 'Wiki Root') { %>Wiki Root<% }else{ %>${data.name}<% } %></span>
+  <span id="group-name"><% if (me == 'Wiki Root') { %>Root<% }else{ %>${data.name}<% } %></span>
 </div>
 
 <div id="group-breadcrumbs" class="breadcrumbs">
-<% if(!data.name.equals("/")){ %><a class="breadcrumb-root breadcrumb" href="${last}">Wiki Root</a><span class="breadcrumb-sep">/</span><% path.each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% }} %>
+<% if(!data.name.equals("/")){ %><a class="breadcrumb-root breadcrumb" href="${last}">(Root)</a><span class="breadcrumb-sep">/</span><% path.each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% }} %>
 </div>
 
-<div id="group-main" class="main-content">
+<div id="group-main">
 <% if ( data.children ){ %>
 <div id="group-listing">
+  <div id="group-listing-title">Available Pages:</div>
   <ul>
   <% data.children.each { %>
-    <li><a href="${it.id}<% if (it.type.name().equals("GROUP")) { %>/<% } %>">${it.label}<% if (it.type.name().equals("GROUP")) { %>/<% } %></a><% } %></li>
+    <li><a href="${it.id}<% if (it.type.name().equals("GROUP")) { %>/<% } else { %>#<% } %>">${it.label}<% if (it.type.name().equals("GROUP")) { %>/<% } %></a><% } %></li>
   </ul>
+</div>
+<div id="group-main-content">
+<% if(mainPg){ %>
+  <div class="embedded-content" page="${mainPg}" class="main-content">Embedded main-page ${mainPg} goes here.</div>
+<% } else { %>
+  Select a page to view.
+<% } %>
 </div>
 <% } %>
 <% if( !readOnly ){ %>
+</div>
 <div id="buttonbar-group-view" class="buttonbar">
   <button id="group-new-form-trigger">New...</button>
   <button id="delete-group">Delete</button>
-</div>
 </div>
 <div id="group-new-panel" style="display:none">
   <form id="group-new-form" class="microform">
@@ -105,15 +131,14 @@ if ( path.length > 0 ){
       <button id="template-form-cancel">Cancel</button>
     </div>
   </div>
-
-  <script type="text/javascript" src="/static/js/wikiMain.js"></script>
-  <script>
-    \$(document).ready(function(){
-      init('/api/group/${data.name}', '/wiki/${data.parent}/', '${data.name}' );
-    });
-  </script>
- <% } %>
-  <script type="text/javascript" src="/static/js/branding.js"></script>
-  <script type="text/javascript" src="/static/js/group-extras.js"></script>
+<% } %>
+    <script type="text/javascript" src="/static/js/wikiMain.js"></script>
+    <script>
+        \$(document).ready(function(){
+          init('/api/group/${data.name}', '/wiki/${data.parent}/', '${data.name}', ${readOnly} );
+        });
+    </script>
+    <script type="text/javascript" src="/static/js/branding.js"></script>
+    <script type="text/javascript" src="/static/js/group-extras.js"></script>
 </body>
 </html>

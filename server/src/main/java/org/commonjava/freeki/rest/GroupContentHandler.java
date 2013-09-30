@@ -20,9 +20,12 @@ import static org.commonjava.freeki.rest.PathParameter.DIR;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
+import io.netty.handler.codec.http.QueryStringDecoder;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.commonjava.freeki.data.FreekiStore;
@@ -35,6 +38,7 @@ import org.commonjava.freeki.infra.route.anno.Route;
 import org.commonjava.freeki.infra.route.anno.Routes;
 import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.util.ContentType;
+import org.commonjava.freeki.util.RequestUtils;
 import org.commonjava.mimeparse.MIMEParse;
 import org.commonjava.util.logging.Logger;
 import org.vertx.java.core.http.HttpServerRequest;
@@ -195,7 +199,19 @@ public class GroupContentHandler
             final Group group = store.getGroup( dir );
             //            logger.info( "Got group with %d children:\n\n  %s\n\n", group.getChildren()
             //                                                                         .size(), join( group.getChildren(), "\n  " ) );
-            final String rendered = engine.render( group, type );
+
+            Map<String, String> queryParams;
+            if ( req.query() != null )
+            {
+                final QueryStringDecoder qsd = new QueryStringDecoder( req.query(), false );
+                queryParams = RequestUtils.toMap( qsd.parameters() );
+            }
+            else
+            {
+                queryParams = Collections.emptyMap();
+            }
+
+            final String rendered = engine.render( group, type, queryParams );
 
             if ( type != null )
             {

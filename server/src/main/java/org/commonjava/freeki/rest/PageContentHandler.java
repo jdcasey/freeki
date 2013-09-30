@@ -21,12 +21,15 @@ import static org.commonjava.freeki.rest.PathParameter.PAGE;
 import static org.commonjava.freeki.util.ContentType.APPLICATION_JSON;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_PLAIN;
+import io.netty.handler.codec.http.QueryStringDecoder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.commonjava.freeki.data.FreekiStore;
@@ -40,6 +43,7 @@ import org.commonjava.freeki.infra.route.anno.Route;
 import org.commonjava.freeki.infra.route.anno.Routes;
 import org.commonjava.freeki.model.Page;
 import org.commonjava.freeki.util.ContentType;
+import org.commonjava.freeki.util.RequestUtils;
 import org.commonjava.mimeparse.MIMEParse;
 import org.commonjava.util.logging.Logger;
 import org.vertx.java.core.Handler;
@@ -305,7 +309,19 @@ public class PageContentHandler
         {
             final Page pg = store.getPage( dir, page );
             //            logger.info( "Got page: %s\n", pg.getId() );
-            final String rendered = engine.render( pg, type );
+
+            Map<String, String> queryParams;
+            if ( req.query() != null )
+            {
+                final QueryStringDecoder qsd = new QueryStringDecoder( req.query(), false );
+                queryParams = RequestUtils.toMap( qsd.parameters() );
+            }
+            else
+            {
+                queryParams = Collections.emptyMap();
+            }
+
+            final String rendered = engine.render( pg, type, queryParams );
 
             //            logger.info( "Rendered to:\n\n%s\n\n", rendered );
 

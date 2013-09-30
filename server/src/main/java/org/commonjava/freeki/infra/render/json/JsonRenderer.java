@@ -16,6 +16,8 @@
  ******************************************************************************/
 package org.commonjava.freeki.infra.render.json;
 
+import java.util.Map;
+
 import org.commonjava.freeki.infra.render.ContentRenderer;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.web.json.ser.JsonSerializer;
@@ -40,7 +42,7 @@ public class JsonRenderer
     }
 
     @Override
-    public String render( final Object data )
+    public String render( final Object data, final Map<String, String> requestParams )
     {
         return serializer.toString( data );
     }

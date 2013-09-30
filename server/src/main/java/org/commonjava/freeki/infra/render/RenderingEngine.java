@@ -46,7 +46,7 @@ public class RenderingEngine
         }
     }
 
-    public String render( final Object data, final ContentType type )
+    public String render( final Object data, final ContentType type, final Map<String, String> requestParams )
         throws RenderingException
     {
         if ( data == null )
@@ -58,7 +58,7 @@ public class RenderingEngine
         //        System.out.printf( "Using renderer: %s for data: %s with content-type: %s\n", renderer, data, type );
         if ( renderer != null )
         {
-            return renderer.render( data );
+            return renderer.render( data, requestParams );
         }
 
         throw new RenderingException( "Cannot find renderer for content type: %s", type );

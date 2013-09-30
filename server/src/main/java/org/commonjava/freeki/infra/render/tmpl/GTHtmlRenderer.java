@@ -63,7 +63,7 @@ public class GTHtmlRenderer
     }
 
     @Override
-    public String render( final Object data )
+    public String render( final Object data, final Map<String, String> requestParams )
         throws RenderingException
     {
         final String path = config.getTemplate( TEXT_HTML, getTemplateKey( data ) );
@@ -73,6 +73,7 @@ public class GTHtmlRenderer
             final Map<String, Object> map = new HashMap<String, Object>();
             map.put( "data", data );
             map.put( "readOnly", config.isReadOnly() );
+            map.put( "params", requestParams );
 
             final String ct = getContentTemplate( data );
             String content;

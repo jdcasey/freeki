@@ -58,7 +58,7 @@ public class GTTextRenderer
     }
 
     @Override
-    public String render( final Object data )
+    public String render( final Object data, final Map<String, String> requestParams )
         throws RenderingException
     {
         final String path = config.getTemplate( TEXT_PLAIN, getTemplateKey( data ) );
@@ -86,6 +86,7 @@ public class GTTextRenderer
             final Map<String, Object> map = new HashMap<String, Object>();
             map.put( "data", data );
             map.put( "readOnly", config.isReadOnly() );
+            map.put( "params", requestParams );
 
             final Writable output = template.make( map );
 

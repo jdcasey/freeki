@@ -16,6 +16,8 @@
  ******************************************************************************/
 package org.commonjava.freeki.infra.render;
 
+import java.util.Map;
+
 import org.commonjava.freeki.util.ContentType;
 
 public interface ContentRenderer
@@ -23,7 +25,7 @@ public interface ContentRenderer
 
     ContentType[] getContentTypes();
 
-    String render( Object data )
+    String render( Object data, Map<String, String> requestParams )
         throws RenderingException;
 
 }

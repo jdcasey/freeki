@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 %>
+<% 
+def contentOnly = 'content-only'.equals(params.get('format'))
+System.out.println(params)
+if (!contentOnly){
+%>
 <html>
   <head>
     <title>${data.title}</title>
@@ -28,9 +33,12 @@
     
     <link rel="stylesheet" href="/static/css/jquery-ui.css"/>
     <link rel="stylesheet" href="/static/css/pagedown.css"/>
+    <link rel="stylesheet" href="/static/css/wikiMain.css"/>
     <link rel="stylesheet" href="/static/css/branding.css"/>
   </head>
+ <% } %>
   <body>
+<% if (!contentOnly){ %>
 <div id="page-branding-header" class="branding-header">
   <span id="freeki-plug">Look, another <a target="_new" href="https://github.com/jdcasey/freeki">Freeki</a> portable wiki!</span>
 </div>
@@ -38,8 +46,9 @@
 <% def last = '/wiki/' %>
 <a class="breadcrumb-root breadcrumb" href="${last}">Wiki Root</a><span class="breadcrumb-sep">/</span><% data.group.split('/').each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% } %>
 </div>
+<% } %>
 <div id="page-main" class="main-content">
-<% if(readOnly){ %>
+<% if( contentOnly || readOnly){ %>
 <div id="page-content">
   ${rendered}
 </div>
@@ -75,6 +84,7 @@ ${data.content}
 </div>
 <% } %>
 
+<% if (!contentOnly){ %>
   <footer id="page-footer">
     <div class="generated-on">
       <span style="font-size: small;">Last updated: ${data.updated} by ${data.currentAuthor}.</span>
@@ -87,20 +97,22 @@ ${data.content}
       </span>
     </div>
   </footer>
-
+  
 <% if ( !readOnly ){ %>
 <!-- hidden panels -->
   <div id="page-edit-help" class="edit-help" style="display:none">Help goes here.<br/>Blat<br/>Blah.<br/>Boo</div>
   <div id="wmd-preview" class="wmd-preview" style="display:none"></div>
 
+<% } %>
+
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>
   <script>
     \$(document).ready(function(){
-      init('/api/page/${data.id}', '/wiki/${data.group}/', '${data.group}' );
+      init('/api/page/${data.id}', '/wiki/${data.group}/', '${data.group}', ${readOnly} );
     });
   </script>
-<% } %>
   <script type="text/javascript" src="/static/js/branding.js"></script>
   <script type="text/javascript" src="/static/js/page-extras.js"></script>
+ <% } %>
 </body>
 </html>
