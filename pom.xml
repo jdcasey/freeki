@@ -36,6 +36,7 @@
   <licenses>
     <license>
       <name>GPLv3.0</name>
+      <distribution>repo</distribution>
       <url>http://www.gnu.org/licenses/gpl.txt</url>
     </license>
   </licenses>
