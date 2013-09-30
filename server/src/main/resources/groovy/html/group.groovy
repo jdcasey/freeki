@@ -29,13 +29,13 @@ if ( path.length > 0 ){
 def mainPg;
 if ( data.children ){
   data.children.find {
-    if (it.type.name().equals("PAGE") && mainPages.contains(it.label) ){
-      System.out.println( "Found main page: ${it.label}" )
+    if (it.type.name().equals("PAGE") && mainPages.contains(it.id) ){
+      System.out.println( "Found main page: ${it.id}" )
       mainPg = it.id
       return true
     }
     
-    System.out.println("NOT main: ${it.label}")
+    System.out.println("NOT main: ${it.id}")
     return false
   }
 }
@@ -77,7 +77,7 @@ if ( data.children ){
 </div>
 <div id="group-main-content">
 <% if(mainPg){ %>
-  <div class="embedded-content" page="${mainPg}" class="main-content">Embedded main-page ${mainPg} goes here.</div>
+  <div class="embedded-content" page="${mainPg}" class="main-content"><span style="color: red;">Loading ${mainPg}. Please wait...</span></div>
 <% } else { %>
   Select a page to view.
 <% } %>
