@@ -197,6 +197,14 @@ public class GroupContentHandler
         try
         {
             final Group group = store.getGroup( dir );
+            if ( group == null )
+            {
+                req.response()
+                   .setStatusCode( 404 )
+                   .setStatusMessage( "Not found." )
+                   .end();
+            }
+
             //            logger.info( "Got group with %d children:\n\n  %s\n\n", group.getChildren()
             //                                                                         .size(), join( group.getChildren(), "\n  " ) );
 
@@ -220,8 +228,18 @@ public class GroupContentHandler
                    .add( "Content-Type", type.value() );
             }
 
-            req.response()
-               .end( rendered );
+            if ( rendered != null )
+            {
+                req.response()
+                   .end( rendered );
+            }
+            else
+            {
+                req.response()
+                   .setStatusCode( 500 )
+                   .setStatusMessage( "Rendered group has no content." )
+                   .end();
+            }
         }
         catch ( IOException | RenderingException e )
         {

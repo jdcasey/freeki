@@ -43,6 +43,8 @@ public class Page
 
     private String id;
 
+    private String localId;
+
     private String title;
 
     private Date updated = new Date();
@@ -67,8 +69,8 @@ public class Page
         this.content = content;
         this.title = title;
         this.currentAuthor = author;
-        this.id = serverPathFor( group, pageName );
-        //        logger.info( "id for '%s' is: '%s'", title, id );
+        this.localId = idFor( pageName );
+        this.id = buildPath( group, localId );
     }
 
     public Map<String, String> getMetadata()
@@ -431,6 +433,16 @@ public class Page
     public String toString()
     {
         return String.format( "Page [id=%s, title=%s, group=%s]", id, title, group );
+    }
+
+    public String getLocalId()
+    {
+        return localId;
+    }
+
+    public void setLocalId( final String localId )
+    {
+        this.localId = localId;
     }
 
 }

@@ -308,6 +308,14 @@ public class PageContentHandler
         try
         {
             final Page pg = store.getPage( dir, page );
+            if ( pg == null )
+            {
+                req.response()
+                   .setStatusCode( 404 )
+                   .setStatusMessage( "Not found." )
+                   .end();
+            }
+
             //            logger.info( "Got page: %s\n", pg.getId() );
 
             Map<String, String> queryParams;
@@ -332,8 +340,18 @@ public class PageContentHandler
                    .add( "Content-Type", type.value() );
             }
 
-            req.response()
-               .end( rendered );
+            if ( rendered != null )
+            {
+                req.response()
+                   .end( rendered );
+            }
+            else
+            {
+                req.response()
+                   .setStatusCode( 500 )
+                   .setStatusMessage( "Rendered page has no content." )
+                   .end();
+            }
         }
         catch ( IOException | RenderingException e )
         {

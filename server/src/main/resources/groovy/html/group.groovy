@@ -58,13 +58,12 @@ if ( data.children ){
 <div id="group-branding-header" class="branding-header">
   <span class="freeki-plug">Look, another <a target="_new" href="https://github.com/jdcasey/freeki">Freeki</a> portable wiki!</span>
 </div>
-<div id="group-header-panel">
-  <span id="group-name"><% if (me == 'Wiki Root') { %>Root<% }else{ %>${data.name}<% } %></span>
-</div>
 
+<% if(!data.name.equals("/")){ %>
 <div id="group-breadcrumbs" class="breadcrumbs">
-<% if(!data.name.equals("/")){ %><a class="breadcrumb-root breadcrumb" href="${last}">(Root)</a><span class="breadcrumb-sep">/</span><% path.each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% }} %>
+<a class="breadcrumb-root breadcrumb" href="${last}">(Root)</a><span class="breadcrumb-sep">/</span><% path.each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% } %>
 </div>
+<% } %>
 
 <div id="group-main">
 <% if ( data.children ){ %>
@@ -91,15 +90,15 @@ if ( data.children ){
 </div>
 <div id="group-new-panel" style="display:none">
   <form id="group-new-form" class="microform">
-    <span class="form-line"><label>Title</label><input type="text" cols="40" id="group-new-title"/></span>
-    <span class="form-line">
-      <input type="radio" name="newtype" id="group-new-grouptype" value="group" checked="true">Group</input>
-      <input type="radio" name="newtype" id="group-new-pagetype" value="page">Page</input>
+    <div class="form-line" id="new-title"><label>Title</label><input type="text" cols="40" id="group-new-title"/></div>
+    <div class="form-line">
+      <input type="radio" name="newtype" id="group-new-group" value="group" checked="true">Group</input>
+      <input type="radio" name="newtype" id="group-new-page" value="page">Page</input>
       <input type="radio" name="newtype" id="group-new-template" value="template">From Template...</input>
-    </span>
-    <span class="form-line" id="template-selector-field" style="display:none">
+    </div>
+    <div class="form-line" id="template-selector-field" style="display:none">
       <label>Choose a Template:</label><select id="templates-list"><option>Select a template</option></select>
-    </span>
+    </div>
     <div class="buttonbar microform-buttons">
       <button id="group-new-submit">Create</button>
       <button id="group-new-cancel">Cancel</button>

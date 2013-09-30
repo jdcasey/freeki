@@ -257,6 +257,7 @@ public class FreekiStore
         throws IOException
     {
         final File pageFile = getFile( page.getId() + ".md" );
+        logger.info( "Storing %s\n\nto: %s", page, pageFile );
         final File dir = pageFile.getParentFile();
 
         if ( !dir.isDirectory() && !dir.mkdirs() )

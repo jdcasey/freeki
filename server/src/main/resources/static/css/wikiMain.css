@@ -1,3 +1,5 @@
+/* @override http://localhost:8080/static/css/wikiMain.css */
+
 /*
 Copyright (C) 2013 John Casey.
 
@@ -162,4 +164,24 @@ footer{
 
 a.breadcrumb {
   text-decoration: none;
+}
+
+.microform{
+	margin-top: 15px;
+	padding: 5px;
+    border: 1px solid #aaaaaa;
+	width: 1190px;
+}
+
+.microform-buttons{
+	margin-top: 10px;
+}
+
+.form-line {
+	display: inline;
+	margin-left: 10px;
+}
+
+input,select{
+	margin-left: 10px;
 }
