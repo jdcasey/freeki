@@ -25,7 +25,7 @@
 
   <groupId>org.commonjava.freeki</groupId>
   <artifactId>freeki-vertx-parent</artifactId>
-  <version>0.4.1</version>
+  <version>0.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Freeki Vert.x Server :: Parent</name>
@@ -58,7 +58,7 @@
       <dependency>
         <groupId>org.commonjava.freeki</groupId>
         <artifactId>freeki-vertx-routing-api</artifactId>
-        <version>0.4.1</version>
+        <version>0.5-SNAPSHOT</version>
       </dependency>
       
       <dependency>
