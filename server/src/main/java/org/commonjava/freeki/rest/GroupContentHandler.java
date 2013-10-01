@@ -203,6 +203,7 @@ public class GroupContentHandler
                    .setStatusCode( 404 )
                    .setStatusMessage( "Not found." )
                    .end();
+                return;
             }
 
             //            logger.info( "Got group with %d children:\n\n  %s\n\n", group.getChildren()

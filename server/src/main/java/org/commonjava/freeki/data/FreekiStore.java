@@ -257,7 +257,6 @@ public class FreekiStore
         throws IOException
     {
         final File pageFile = getFile( page.getId() + ".md" );
-        logger.info( "Storing %s\n\nto: %s", page, pageFile );
         final File dir = pageFile.getParentFile();
 
         if ( !dir.isDirectory() && !dir.mkdirs() )
@@ -339,17 +338,13 @@ public class FreekiStore
     public Page getPage( final String group, final String id )
         throws IOException
     {
-        System.out.printf( "Looking for page: %s in group: %s\n", id, group );
         final File file = getFileById( group, id );
         if ( !file.exists() )
         {
-            System.out.printf( "Not a page: %s\n", file );
             return null;
         }
 
-        System.out.printf( "Reading page from: %s\n", file );
         String content = readFileToString( file );
-        System.out.printf( "Page content:\n\n%s\n\n", content );
 
         PlotCommit<PlotLane> commit;
         try
@@ -566,8 +561,6 @@ public class FreekiStore
     public PlotCommit<PlotLane> getHeadCommit( final File f )
         throws Exception
     {
-        logger.info( "Resolving HEAD commit for: %s", f );
-
         final ObjectId oid = repo.resolve( "HEAD" );
         final PlotWalk pw = new PlotWalk( repo );
         final RevCommit rc = pw.parseCommit( oid );

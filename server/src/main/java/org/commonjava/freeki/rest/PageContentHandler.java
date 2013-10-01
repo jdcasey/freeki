@@ -314,6 +314,7 @@ public class PageContentHandler
                    .setStatusCode( 404 )
                    .setStatusMessage( "Not found." )
                    .end();
+                return;
             }
 
             //            logger.info( "Got page: %s\n", pg.getId() );
