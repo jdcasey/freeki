@@ -59,6 +59,9 @@ if (!contentOnly){
   <button id="edit-page">Edit</button>
   <button id="delete-page">Delete</button>
 </div>
+<div id="buttonbar-page-global" class="buttonbar">
+  <button id="push-updates">Push Updates</button>
+</div>
 </div>
 <div id="page-edit" style="display:none">
   <div id="editor-content">
@@ -102,7 +105,17 @@ ${data.content}
 <!-- hidden panels -->
   <div id="page-edit-help" class="edit-help" style="display:none">Help goes here.<br/>Blat<br/>Blah.<br/>Boo</div>
   <div id="wmd-preview" class="wmd-preview" style="display:none"></div>
-
+  <div id="user-pass-panel" style="display:none" class="template">
+    <form id="user-pass-form">
+      <div class="form-line"><span id="user-pass-instructions" class="instructions"></span></div>
+      <div class="form-line"><label>Username:</label><input id="user" name="user" type="text" cols="20"></input></div>
+      <div class="form-line"><label>Password:</label><input id="password" name="password" type="password" cols="30"></input></div>
+      <div class="buttonbar microform-buttons">
+        <button id="user-pass-submit">Ok</button>
+        <button id="user-pass-cancel">Cancel</button>
+      </div>
+    </form>
+  </div>
 <% } %>
 
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>

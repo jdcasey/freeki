@@ -43,7 +43,7 @@ import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
 import org.commonjava.freeki.rest.StaticContentHandler;
 import org.commonjava.freeki.rest.TemplateContentHandler;
-import org.commonjava.freeki.rest.UpdateNotificationHandler;
+import org.commonjava.freeki.rest.UpdateHandler;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.web.json.ser.JsonSerializer;
 import org.kohsuke.args4j.CmdLineException;
@@ -162,7 +162,7 @@ public class Main
                 add( new GroupContentHandler( store, engine, authorizer ) );
                 add( new PageContentHandler( store, engine, authorizer ) );
                 add( new StaticContentHandler( config ) );
-                add( new UpdateNotificationHandler( store ) );
+                add( new UpdateHandler( store ) );
                 add( new TemplateContentHandler( new TemplateController( store, config ), serializer ) );
             }
         };

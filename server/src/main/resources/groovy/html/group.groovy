@@ -61,7 +61,7 @@ if ( data.children ){
 
 <% if(!data.name.equals("/")){ %>
 <div id="group-breadcrumbs" class="breadcrumbs">
-<a class="breadcrumb-root breadcrumb" href="${last}">(Root)</a><span class="breadcrumb-sep">/</span><% path.each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% } %>
+<a class="breadcrumb-root breadcrumb" href="${last}">(Root)</a><span class="breadcrumb-sep">/</span><% path.each { last = last + it + '/' %> <a class="breadcrumb" href="${last}">${it}</a><span class="breadcrumb-sep">/</span><% } %><span class="breadcrumb">${me}</span><span class="breadcrumb-sep">/</span>
 </div>
 <% } %>
 
@@ -87,6 +87,7 @@ if ( data.children ){
 <div id="buttonbar-group-view" class="buttonbar">
   <button id="group-new-form-trigger">New...</button>
   <button id="delete-group">Delete</button>
+  <button id="push-updates">Push Updates</button>
 </div>
 <div id="group-new-panel" style="display:none">
   <form id="group-new-form" class="microform">
@@ -129,6 +130,17 @@ if ( data.children ){
       <button id="template-form-submit">Create</button>
       <button id="template-form-cancel">Cancel</button>
     </div>
+  </div>
+  <div id="user-pass-panel" style="display:none" class="template">
+    <form id="user-pass-form">
+      <div class="form-line"><span id="user-pass-instructions" class="instructions"></span></div>
+      <div class="form-line"><label>Username:</label><input id="user" name="user" type="text" cols="20"></input></div>
+      <div class="form-line"><label>Password:</label><input id="password" name="password" type="password" cols="30"></input></div>
+      <div class="buttonbar microform-buttons">
+        <button id="user-pass-submit">Ok</button>
+        <button id="user-pass-cancel">Cancel</button>
+      </div>
+    </form>
   </div>
 <% } %>
     <script type="text/javascript" src="/static/js/wikiMain.js"></script>

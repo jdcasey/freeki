@@ -35,7 +35,6 @@ body{
 
 #page-content{
   max-width: 1200px;
-  min-width: 1000px;
 }
 
 #group-main{
@@ -45,6 +44,13 @@ body{
 
 #group-listing{
 	float: left;
+	max-width: 250px;
+}
+
+#group-listing li{
+	margin-left: -40px;
+	margin-top: 4px;
+	list-style: none;
 }
 
 #group-listing-title{
@@ -53,8 +59,8 @@ body{
 }
 
 #group-main-content{
-	float:right;
-	width: 1000px;
+	padding-left: 10px;
+	max-width: 1000px;
 	overflow:auto;
 }
 
@@ -177,9 +183,13 @@ a.breadcrumb {
 	margin-top: 10px;
 }
 
-.form-line {
+.microform .form-line {
 	display: inline;
 	margin-left: 10px;
+}
+
+:not(.microform) .form-line {
+    margin-top: 10px;
 }
 
 input,select{

@@ -58,6 +58,8 @@ import org.eclipse.jgit.revplot.PlotWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -637,7 +639,23 @@ public class FreekiStore
         }
         catch ( final GitAPIException e )
         {
-            throw new IOException( "Cannot update content via git: " + e.getMessage(), e );
+            throw new IOException( "Cannot pull content updates via git: " + e.getMessage(), e );
+        }
+    }
+
+    public void pushUpdates( final String user, final String password )
+        throws IOException
+    {
+        final CredentialsProvider cp = new UsernamePasswordCredentialsProvider( user, password );
+        try
+        {
+            git.push()
+               .setCredentialsProvider( cp )
+               .call();
+        }
+        catch ( final GitAPIException e )
+        {
+            throw new IOException( "Cannot push content updates via git: " + e.getMessage(), e );
         }
     }
 }

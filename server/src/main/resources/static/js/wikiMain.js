@@ -231,6 +231,89 @@ $('#template-form-cancel').click(function(){
 	$('#template-panel').dialog("destroy");
 });
 
+$("#push-updates").click(function(){
+	if ( readonly ){return;}
+	
+	collectUserPass("Enter credentials for this Git repository's owner:", function(userpass){
+		$.ajax({
+			type: 'POST',
+			url: "/update/push",
+			headers: userpass,
+			data: {}
+		}).done(function(data,textstatus,jqxhr){
+			var url = jqxhr.getResponseHeader('Location');
+			if ( url ){
+				window.location=url;
+			}
+		}).fail(function(data,textstatus,error){
+			if ( textstatus == 'error'){
+				alert("Push failed: " + textstatus + "\nError: " + error);
+			}
+			else{
+				alert("Push failed: " + textstatus);
+			}
+		});
+	});
+});
+
+$('#user-pass-form').submit(function(){
+	return false;
+});
+
+$('#user-pass-submit').click(function(){
+	$('#user-pass-panel').dialog("close");
+});
+
+$('#user-pass-cancel').click(function(){
+	$('#user-pass-panel').dialog("destroy");
+});
+
+function collectUserPass( title, callable ){
+	if ( readonly ){return;}
+	
+	$('#user-pass-instructions').text(title);
+	$('#user-pass-panel').dialog({
+		title: "Enter Username and Password",
+		height: 'auto',
+		width: 'auto',
+		resize: 'auto',
+		modal: true,
+//		buttons: [
+//		  { 
+//		  	text: "Ok", 
+//		  	click: function() {
+//		  	  $( this ).dialog( "close" );
+//		  	}
+//		  },
+//		  { 
+//		  	text: "Cancel", 
+//		  	click: function() {
+//		  	  $( this ).dialog( "destroy" ); 
+//		  	}
+//		  },
+//		],
+		close: function( event, ui ){
+  		var user = $('#user').val();
+  		var pass = $('#password').val();
+  		
+  		if (user != '' && pass != '' ){
+  			userpass = {
+  					"user": user,
+  					"password": pass,
+  			};
+  			
+  			$('#user-pass-instructions').text('');
+  			$('#user').val('');
+  			$('#password').val('');
+  			
+  			callable(userpass);
+  		}
+  		
+			$(this).dialog("destroy");
+		},
+	});
+}
+
 function createGroup(title){
 	if ( readonly ){return;}
 	
