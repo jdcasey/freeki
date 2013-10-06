@@ -103,11 +103,15 @@
     </dependency> -->
     <dependency>
       <groupId>org.commonjava.vertx</groupId>
-      <artifactId>vabr</artifactId>
+      <artifactId>vabr-api</artifactId>
     </dependency>
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.vertx</groupId>
+      <artifactId>vabr-processor</artifactId>
     </dependency>
   </dependencies>
   
@@ -129,13 +133,13 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <dependencies>
+          <!-- <dependencies>
             <dependency>
               <groupId>org.commonjava.vertx</groupId>
-              <artifactId>vabr</artifactId>
+              <artifactId>vabr-processor</artifactId>
               <version>${vabrVersion}</version>
             </dependency>
-          </dependencies>
+          </dependencies> -->
           <configuration>
             <source>1.7</source>
             <target>1.7</target>

@@ -51,15 +51,21 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vertx.version>2.0.0-final</vertx.version>
     <vertx.testtools.version>2.0.0-final</vertx.testtools.version>
-    <vabrVersion>1.0</vabrVersion>
+    <vabrVersion>1.1</vabrVersion>
   </properties>
   
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.commonjava.vertx</groupId>
-        <artifactId>vabr</artifactId>
+        <artifactId>vabr-api</artifactId>
         <version>${vabrVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.vertx</groupId>
+        <artifactId>vabr-processor</artifactId>
+        <version>${vabrVersion}</version>
+        <scope>provided</scope>
       </dependency>
       
       <dependency>
