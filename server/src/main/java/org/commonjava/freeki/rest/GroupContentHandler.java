@@ -32,15 +32,15 @@ import org.commonjava.freeki.data.FreekiStore;
 import org.commonjava.freeki.infra.auth.Authorizer;
 import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.RenderingException;
-import org.commonjava.freeki.infra.route.Method;
-import org.commonjava.freeki.infra.route.RouteHandler;
-import org.commonjava.freeki.infra.route.anno.Route;
-import org.commonjava.freeki.infra.route.anno.Routes;
 import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.util.ContentType;
 import org.commonjava.freeki.util.RequestUtils;
 import org.commonjava.mimeparse.MIMEParse;
 import org.commonjava.util.logging.Logger;
+import org.commonjava.vertx.vabr.Method;
+import org.commonjava.vertx.vabr.RouteHandler;
+import org.commonjava.vertx.vabr.anno.Route;
+import org.commonjava.vertx.vabr.anno.Routes;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class GroupContentHandler

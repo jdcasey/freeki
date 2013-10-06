@@ -25,6 +25,7 @@ import java.io.File;
 
 import org.commonjava.freeki.conf.FreekiConfig;
 import org.commonjava.freeki.data.FreekiStore;
+import org.commonjava.freeki.data.GitManager;
 import org.commonjava.freeki.model.Page;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revplot.PlotCommit;
@@ -34,7 +35,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class FreekiStoreTest
+public class GitManagerTest
 {
 
     private FreekiStore store;
@@ -44,12 +45,16 @@ public class FreekiStoreTest
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
+    private GitManager git;
+
     @Before
     public void setup()
         throws Exception
     {
         dir = temp.newFolder( "freeki" );
-        store = new FreekiStore( new FreekiConfig( dir )/*, new JsonSerializer( new PrettyPrintingAdapter() )*/);
+        final FreekiConfig config = new FreekiConfig( dir );
+        git = new GitManager( config );
+        store = new FreekiStore( config, git );
 
         final Page pg = new Page( "mygroup", "page-id", "# Page Id\n\n## This is a header", "Page Id", System.currentTimeMillis(), "John Casey" );
         store.storePage( pg );
@@ -59,7 +64,7 @@ public class FreekiStoreTest
     public void getLogForValidFile()
         throws Exception
     {
-        final PlotCommit<PlotLane> log = store.getHeadCommit( new File( dir, "mygroup/page-id.md" ) );
+        final PlotCommit<PlotLane> log = git.getHeadCommit( new File( dir, "mygroup/page-id.md" ) );
         assertThat( log, notNullValue() );
         final PersonIdent ident = log.getAuthorIdent();
         assertThat( ident, notNullValue() );
@@ -90,7 +95,7 @@ public class FreekiStoreTest
     public void getLogForInvalidFile()
         throws Exception
     {
-        final PlotCommit<PlotLane> log = store.getHeadCommit( new File( dir, "path/to/group/page-missing.md" ) );
+        final PlotCommit<PlotLane> log = git.getHeadCommit( new File( dir, "path/to/group/page-missing.md" ) );
         assertThat( log, nullValue() );
     }
 

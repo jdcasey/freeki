@@ -19,25 +19,25 @@ package org.commonjava.freeki.rest;
 import java.io.IOException;
 import java.util.Date;
 
-import org.commonjava.freeki.data.FreekiStore;
-import org.commonjava.freeki.infra.route.Method;
-import org.commonjava.freeki.infra.route.RouteHandler;
-import org.commonjava.freeki.infra.route.anno.Route;
-import org.commonjava.freeki.infra.route.anno.Routes;
+import org.commonjava.freeki.data.GitManager;
 import org.commonjava.util.logging.Logger;
+import org.commonjava.vertx.vabr.Method;
+import org.commonjava.vertx.vabr.RouteHandler;
+import org.commonjava.vertx.vabr.anno.Route;
+import org.commonjava.vertx.vabr.anno.Routes;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class UpdateHandler
     implements RouteHandler
 {
 
-    private final FreekiStore store;
-
     private final Logger logger = new Logger( getClass() );
 
-    public UpdateHandler( final FreekiStore store )
+    private final GitManager git;
+
+    public UpdateHandler( final GitManager git )
     {
-        this.store = store;
+        this.git = git;
     }
 
     /* @formatter:off */
@@ -50,7 +50,7 @@ public class UpdateHandler
     {
         try
         {
-            store.pullUpdates();
+            git.pullUpdates();
             req.response()
                .end();
         }
@@ -79,7 +79,7 @@ public class UpdateHandler
 
         try
         {
-            store.pushUpdates( user, password );
+            git.pushUpdates( user, password );
             req.response()
                .end();
 

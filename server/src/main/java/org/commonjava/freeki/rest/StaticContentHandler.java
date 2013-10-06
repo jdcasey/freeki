@@ -24,10 +24,10 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.commonjava.freeki.conf.FreekiConfig;
-import org.commonjava.freeki.infra.route.Method;
-import org.commonjava.freeki.infra.route.RouteHandler;
-import org.commonjava.freeki.infra.route.anno.Route;
-import org.commonjava.freeki.infra.route.anno.Routes;
+import org.commonjava.vertx.vabr.Method;
+import org.commonjava.vertx.vabr.RouteHandler;
+import org.commonjava.vertx.vabr.anno.Route;
+import org.commonjava.vertx.vabr.anno.Routes;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 

@@ -51,14 +51,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vertx.version>2.0.0-final</vertx.version>
     <vertx.testtools.version>2.0.0-final</vertx.testtools.version>
+    <vabrVersion>1.0-SNAPSHOT</vabrVersion>
   </properties>
   
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.commonjava.freeki</groupId>
-        <artifactId>freeki-vertx-routing-api</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <groupId>org.commonjava.vertx</groupId>
+        <artifactId>vabr</artifactId>
+        <version>${vabrVersion}</version>
       </dependency>
       
       <dependency>
@@ -87,7 +88,12 @@
       <dependency>
         <groupId>org.eclipse.jgit</groupId>
         <artifactId>org.eclipse.jgit</artifactId>
-        <version>2.2.0.201212191850-r</version>
+        <version>3.0.0.201306101825-r</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.mylyn.github</groupId>
+        <artifactId>org.eclipse.egit.github.core</artifactId>
+        <version>2.1.5</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.mimeparse</groupId>
@@ -158,7 +164,6 @@
   </build>
   
   <modules>
-    <module>routing-api</module>
     <module>server</module>
   </modules>
 </project>

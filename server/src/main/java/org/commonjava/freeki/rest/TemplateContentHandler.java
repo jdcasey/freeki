@@ -23,10 +23,10 @@ import java.util.Map;
 
 import org.commonjava.freeki.data.TemplateController;
 import org.commonjava.freeki.data.TemplateException;
-import org.commonjava.freeki.infra.route.Method;
-import org.commonjava.freeki.infra.route.RouteHandler;
-import org.commonjava.freeki.infra.route.anno.Route;
-import org.commonjava.freeki.infra.route.anno.Routes;
+import org.commonjava.vertx.vabr.Method;
+import org.commonjava.vertx.vabr.RouteHandler;
+import org.commonjava.vertx.vabr.anno.Route;
+import org.commonjava.vertx.vabr.anno.Routes;
 import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.json.ser.JsonSerializer;
 import org.vertx.java.core.VoidHandler;

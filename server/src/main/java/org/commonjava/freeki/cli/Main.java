@@ -28,6 +28,7 @@ import java.util.Set;
 import org.commonjava.freeki.conf.FreekiConfig;
 import org.commonjava.freeki.conf.GTemplateConfig;
 import org.commonjava.freeki.data.FreekiStore;
+import org.commonjava.freeki.data.GitManager;
 import org.commonjava.freeki.data.TemplateController;
 import org.commonjava.freeki.infra.auth.Authorizer;
 import org.commonjava.freeki.infra.render.ContentRenderer;
@@ -35,9 +36,6 @@ import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.json.JsonRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTHtmlRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTTextRenderer;
-import org.commonjava.freeki.infra.route.ApplicationRouter;
-import org.commonjava.freeki.infra.route.RouteCollection;
-import org.commonjava.freeki.infra.route.RouteHandler;
 import org.commonjava.freeki.rest.GroupContentHandler;
 import org.commonjava.freeki.rest.OopsHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
@@ -45,6 +43,9 @@ import org.commonjava.freeki.rest.StaticContentHandler;
 import org.commonjava.freeki.rest.TemplateContentHandler;
 import org.commonjava.freeki.rest.UpdateHandler;
 import org.commonjava.freeki.util.ContentType;
+import org.commonjava.vertx.vabr.ApplicationRouter;
+import org.commonjava.vertx.vabr.RouteCollection;
+import org.commonjava.vertx.vabr.RouteHandler;
 import org.commonjava.web.json.ser.JsonSerializer;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -134,7 +135,8 @@ public class Main
         final Vertx v = new DefaultVertx();
         setVertx( v );
 
-        final FreekiStore store = new FreekiStore( config );
+        final GitManager git = new GitManager( config );
+        final FreekiStore store = new FreekiStore( config, git );
 
         final Map<String, String> rawTemplateConf = new HashMap<>();
         rawTemplateConf.put( "group@" + ContentType.TEXT_HTML.value(), "groovy/html/group.groovy" );
@@ -162,7 +164,7 @@ public class Main
                 add( new GroupContentHandler( store, engine, authorizer ) );
                 add( new PageContentHandler( store, engine, authorizer ) );
                 add( new StaticContentHandler( config ) );
-                add( new UpdateHandler( store ) );
+                add( new UpdateHandler( git ) );
                 add( new TemplateContentHandler( new TemplateController( store, config ), serializer ) );
             }
         };

@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,8 +33,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.commonjava.freeki.conf.FreekiConfig;
@@ -44,25 +41,9 @@ import org.commonjava.freeki.model.ChildRef.ChildType;
 import org.commonjava.freeki.model.Group;
 import org.commonjava.freeki.model.Page;
 import org.commonjava.util.logging.Logger;
-import org.eclipse.jgit.api.CommitCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.RmCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoFilepatternException;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revplot.PlotCommit;
-import org.eclipse.jgit.revplot.PlotCommitList;
 import org.eclipse.jgit.revplot.PlotLane;
-import org.eclipse.jgit.revplot.PlotWalk;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
-import org.eclipse.jgit.treewalk.filter.PathFilter;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 public class FreekiStore
 {
@@ -97,62 +78,13 @@ public class FreekiStore
 
     private final FreekiConfig config;
 
-    private Git git;
+    private final GitManager git;
 
-    private int basepathLength;
-
-    private String username;
-
-    private String email;
-
-    private FileRepository repo;
-
-    public FreekiStore( final FreekiConfig config )
+    public FreekiStore( final FreekiConfig config, final GitManager git )
         throws IOException
     {
         this.config = config;
-        setupGit();
-    }
-
-    @PostConstruct
-    public void setupGit()
-        throws IOException
-    {
-        basepathLength = config.getContentDir()
-                               .getPath()
-                               .length() + 1;
-
-        final File gitDir = new File( config.getContentDir(), ".git" );
-        final boolean create = !gitDir.isDirectory();
-
-        final FileRepositoryBuilder builder = new FileRepositoryBuilder().setGitDir( gitDir )
-                                                                         .readEnvironment();
-
-        repo = builder.build();
-
-        username = repo.getConfig()
-                       .getString( "user", null, "name" );
-
-        if ( username == null )
-        {
-            username = System.getProperty( "user.name" );
-        }
-
-        email = repo.getConfig()
-                    .getString( "user", null, "email" );
-
-        if ( email == null )
-        {
-            email = username + "@" + InetAddress.getLocalHost()
-                                                .getCanonicalHostName();
-        }
-
-        if ( create )
-        {
-            repo.create();
-        }
-
-        git = new Git( repo );
+        this.git = git;
     }
 
     public boolean hasGroup( final String group )
@@ -248,7 +180,7 @@ public class FreekiStore
             final File readme = new File( groupDir, "README.txt" );
             FileUtils.write( readme, README );
 
-            addAndCommit( readme, "Adding new group: " + group.getName() );
+            git.addAndCommit( "Adding new group: " + group.getName(), readme );
             return true;
         }
 
@@ -314,7 +246,7 @@ public class FreekiStore
 
         write( pageFile, content );
 
-        addAndCommit( pageFile, ( update ? "Updating: " : "Creating: " ) + page.getTitle() );
+        git.addAndCommit( ( update ? "Updating: " : "Creating: " ) + page.getTitle(), pageFile );
 
         return !update;
     }
@@ -351,7 +283,7 @@ public class FreekiStore
         PlotCommit<PlotLane> commit;
         try
         {
-            commit = getHeadCommit( file );
+            commit = git.getHeadCommit( file );
         }
         catch ( final Exception e )
         {
@@ -487,99 +419,12 @@ public class FreekiStore
 
         if ( !deleted.isEmpty() )
         {
-            deleteAndCommit( deleted, "Removing page: " + id + " from group: " + group + ", and pruning empty directories." );
+            git.deleteAndCommit( "Removing page: " + id + " from group: " + group + ", and pruning empty directories.", deleted );
 
             return true;
         }
 
         return false;
-    }
-
-    private void addAndCommit( final File file, final String message )
-        throws IOException
-    {
-        try
-        {
-            final String filepath = file.getPath()
-                                        .substring( basepathLength );
-
-            git.add()
-               .addFilepattern( filepath )
-               .call();
-
-            // TODO: Get the authorship info from somewhere...
-            git.commit()
-               .setOnly( filepath )
-               .setMessage( message )
-               .setAuthor( username, email )
-               .call();
-        }
-        catch ( final NoFilepatternException e )
-        {
-            throw new IOException( "Cannot add to git: " + e.getMessage(), e );
-        }
-        catch ( final GitAPIException e )
-        {
-            throw new IOException( "Cannot add to git: " + e.getMessage(), e );
-        }
-    }
-
-    private void deleteAndCommit( final Set<File> deleted, final String message )
-        throws IOException
-    {
-        try
-        {
-            RmCommand rm = git.rm();
-            CommitCommand commit = git.commit();
-
-            for ( final File file : deleted )
-            {
-                final String filepath = file.getPath()
-                                            .substring( basepathLength );
-
-                rm = rm.addFilepattern( filepath );
-                commit = commit.setOnly( filepath );
-            }
-
-            rm.call();
-
-            // TODO: Get the authorship info from somewhere...
-            commit.setMessage( message )
-                  .setAuthor( username, email )
-                  .call();
-        }
-        catch ( final NoFilepatternException e )
-        {
-            throw new IOException( "Cannot remove from git: " + e.getMessage(), e );
-        }
-        catch ( final GitAPIException e )
-        {
-            throw new IOException( "Cannot remove from git: " + e.getMessage(), e );
-        }
-
-    }
-
-    // FIXME: Refine throws.
-    public PlotCommit<PlotLane> getHeadCommit( final File f )
-        throws Exception
-    {
-        final ObjectId oid = repo.resolve( "HEAD" );
-        final PlotWalk pw = new PlotWalk( repo );
-        final RevCommit rc = pw.parseCommit( oid );
-        pw.markStart( rc );
-        pw.setTreeFilter( AndTreeFilter.create( PathFilter.create( f.getPath()
-                                                                    .substring( basepathLength ) ), TreeFilter.ANY_DIFF ) );
-
-        final PlotCommitList<PlotLane> cl = new PlotCommitList<>();
-        cl.source( pw );
-        cl.fillTo( 1 );
-
-        return cl.get( 0 );
-        //        final PersonIdent ident = pc.getAuthorIdent();
-        //        final String message = pc.getFullMessage();
-        //        System.out.printf( "%s %s %s %s %s\n\n%s\n", ident.getName(), ident.getEmailAddress(), ident.getWhen(), ident.getTimeZone()
-        //                                                                                                                     .getID(),
-        //                           ident.getTimeZoneOffset(), message );
     }
 
     public SortedSet<Group> listGroups( final String subgroup )
@@ -628,34 +473,4 @@ public class FreekiStore
         return new Group( groupName, pages );
     }
 
-    public void pullUpdates()
-        throws IOException
-    {
-        try
-        {
-            git.pull()
-               .setRebase( true )
-               .call();
-        }
-        catch ( final GitAPIException e )
-        {
-            throw new IOException( "Cannot pull content updates via git: " + e.getMessage(), e );
-        }
-    }
-
-    public void pushUpdates( final String user, final String password )
-        throws IOException
-    {
-        final CredentialsProvider cp = new UsernamePasswordCredentialsProvider( user, password );
-        try
-        {
-            git.push()
-               .setCredentialsProvider( cp )
-               .call();
-        }
-        catch ( final GitAPIException e )
-        {
-            throw new IOException( "Cannot push content updates via git: " + e.getMessage(), e );
-        }
-    }
 }
