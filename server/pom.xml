@@ -113,6 +113,10 @@
       <groupId>org.commonjava.vertx</groupId>
       <artifactId>vabr-processor</artifactId>
     </dependency>
+    <dependency>
+      <groupId>edu.uci.ics</groupId>
+      <artifactId>crawler4j</artifactId>
+    </dependency>
   </dependencies>
   
   <build>

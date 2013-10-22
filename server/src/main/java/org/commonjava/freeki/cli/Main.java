@@ -37,7 +37,7 @@ import org.commonjava.freeki.infra.render.json.JsonRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTHtmlRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTTextRenderer;
 import org.commonjava.freeki.rest.GroupContentHandler;
-import org.commonjava.freeki.rest.OopsHandler;
+import org.commonjava.freeki.rest.OfflineContentHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
 import org.commonjava.freeki.rest.StaticContentHandler;
 import org.commonjava.freeki.rest.TemplateContentHandler;
@@ -141,6 +141,8 @@ public class Main
         final Map<String, String> rawTemplateConf = new HashMap<>();
         rawTemplateConf.put( "group@" + ContentType.TEXT_HTML.value(), "groovy/html/group.groovy" );
         rawTemplateConf.put( "page@" + ContentType.TEXT_HTML.value(), "groovy/html/page.groovy" );
+        rawTemplateConf.put( "group@" + ContentType.STATIC_HTML.value(), "groovy/static-html/group.groovy" );
+        rawTemplateConf.put( "page@" + ContentType.STATIC_HTML.value(), "groovy/static-html/page.groovy" );
         rawTemplateConf.put( "group@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/group.groovy" );
         rawTemplateConf.put( "page@" + ContentType.TEXT_PLAIN.value(), "groovy/plain/page.groovy" );
 
@@ -156,6 +158,8 @@ public class Main
         final RenderingEngine engine = new RenderingEngine( renderers );
         final Authorizer authorizer = new Authorizer( config );
 
+        final StaticContentHandler staticContent = new StaticContentHandler( config );
+
         final Set<RouteHandler> handlers = new HashSet<RouteHandler>()
         {
             private static final long serialVersionUID = 1L;
@@ -163,15 +167,16 @@ public class Main
             {
                 add( new GroupContentHandler( store, engine, authorizer ) );
                 add( new PageContentHandler( store, engine, authorizer ) );
-                add( new StaticContentHandler( config ) );
+                add( staticContent );
                 add( new UpdateHandler( git ) );
                 add( new TemplateContentHandler( new TemplateController( store, config ), serializer ) );
+                add( new OfflineContentHandler( store, engine, staticContent ) );
             }
         };
 
         final ServiceLoader<RouteCollection> collections = ServiceLoader.load( RouteCollection.class );
         final ApplicationRouter router = new ApplicationRouter( handlers, collections );
-        router.noMatch( new OopsHandler( proc ) );
+        router.noMatch( staticContent );
 
         final String listen = config.getListen();
         vertx.createHttpServer()

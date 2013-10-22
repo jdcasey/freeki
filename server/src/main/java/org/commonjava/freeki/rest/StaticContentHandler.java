@@ -20,22 +20,25 @@ import static org.commonjava.freeki.rest.PathParameter.PATH;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.commonjava.freeki.conf.FreekiConfig;
+import org.commonjava.util.logging.Logger;
 import org.commonjava.vertx.vabr.Method;
 import org.commonjava.vertx.vabr.RouteHandler;
 import org.commonjava.vertx.vabr.anno.Route;
 import org.commonjava.vertx.vabr.anno.Routes;
+import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class StaticContentHandler
-    implements RouteHandler
+    implements RouteHandler, Handler<HttpServerRequest>
 {
 
-    //    private final Logger logger = new Logger( getClass() );
+    private final Logger logger = new Logger( getClass() );
 
     private final File staticBasedir;
 
@@ -50,7 +53,6 @@ public class StaticContentHandler
     } )
     /* @formatter:on */
     public void get( final HttpServerRequest req )
-        throws Exception
     {
         req.response()
            .setStatusCode( 200 );
@@ -81,7 +83,20 @@ public class StaticContentHandler
             {
                 //                logger.info( "Sending classpath resource: %s", resource );
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                IOUtils.copy( stream, baos );
+
+                try
+                {
+                    IOUtils.copy( stream, baos );
+                }
+                catch ( final IOException e )
+                {
+                    logger.error( "Failed to read static resource: %s. Reason: %s", e, resource, e.getMessage() );
+                    req.response()
+                       .setStatusCode( 500 )
+                       .setStatusMessage( path + " could not be read." )
+                       .end();
+                    return;
+                }
 
                 try
                 {
@@ -112,5 +127,12 @@ public class StaticContentHandler
             req.response()
                .sendFile( f.getAbsolutePath() );
         }
+    }
+
+    @Override
+    // For fall-back 404 handler
+    public void handle( final HttpServerRequest req )
+    {
+        get( req );
     }
 }

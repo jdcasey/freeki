@@ -49,6 +49,9 @@ function init( url, parent, groupName, readOnly ){
 	var mdPane = $('#wmd-input');
 	if ( mdPane ){
 		converter = new Markdown.Converter();
+		
+		Markdown.Extra.init(converter, {highlighter: "prettify"});
+		
 		converter.hooks.chain("preConversion", function (text) {
 //			alert("Changed to: " + text );
 			editingPageContent = text;

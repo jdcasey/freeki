@@ -22,9 +22,11 @@ public final class ContentType
 
     public static final ContentType TEXT_HTML = new ContentType( "text/html" );
 
+    public static final ContentType STATIC_HTML = new ContentType( "text/x-static-html" );
+
     public static final ContentType TEXT_PLAIN = new ContentType( "text/plain" );
 
-    public static final ContentType[] KNOWN = { APPLICATION_JSON, TEXT_HTML, TEXT_PLAIN };
+    public static final ContentType[] KNOWN = { APPLICATION_JSON, TEXT_HTML, STATIC_HTML, TEXT_PLAIN };
 
     private final String rawType;
 
@@ -49,6 +51,12 @@ public final class ContentType
     public String value()
     {
         return rawType;
+    }
+
+    @Override
+    public String toString()
+    {
+        return value();
     }
 
 }

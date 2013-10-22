@@ -265,7 +265,7 @@ public class FreekiStore
     {
         final File root = config.getContentDir();
         //        logger.info( "Calculating file from base: %s, group: %s, page-id: %s", root, group, id );
-        final File groupDir = group.length() < 1 || group.equals( "/" ) ? root : new File( root, group );
+        final File groupDir = group == null || group.length() < 1 || group.equals( "/" ) ? root : new File( root, group );
         return id == null ? groupDir : new File( groupDir, id + ".md" );
     }
 
@@ -368,7 +368,14 @@ public class FreekiStore
             }
         }
 
-        metadata.put( MD_CONTENT, sb.toString() );
+        if ( sb.length() > 0 )
+        {
+            metadata.put( MD_CONTENT, sb.toString() );
+        }
+        else
+        {
+            metadata.put( MD_CONTENT, content );
+        }
 
         return metadata;
     }

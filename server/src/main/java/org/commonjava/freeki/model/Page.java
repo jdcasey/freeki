@@ -29,6 +29,7 @@ import org.commonjava.freeki.infra.anno.RenderKey;
 
 @RenderKey( key = "page", contentTemplate = "${data.content}" )
 public class Page
+    implements Comparable<Page>
 {
 
     //    private static final String COMMENT_START = "<!---";
@@ -443,6 +444,12 @@ public class Page
     public void setLocalId( final String localId )
     {
         this.localId = localId;
+    }
+
+    @Override
+    public int compareTo( final Page o )
+    {
+        return getId().compareTo( o.getId() );
     }
 
 }
