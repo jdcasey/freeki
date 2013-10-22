@@ -18,7 +18,6 @@ package org.commonjava.freeki.infra.render.tmpl;
 
 import static org.commonjava.freeki.infra.render.RenderUtils.getContentTemplate;
 import static org.commonjava.freeki.infra.render.RenderUtils.getTemplateKey;
-import static org.commonjava.freeki.util.ContentType.STATIC_HTML;
 import static org.commonjava.freeki.util.ContentType.TEXT_HTML;
 import groovy.lang.Writable;
 import groovy.text.GStringTemplateEngine;
@@ -42,7 +41,7 @@ public class GTHtmlRenderer
     implements ContentRenderer
 {
 
-    private static final ContentType[] TYPES = { TEXT_HTML, STATIC_HTML };
+    private static final ContentType[] TYPES = { TEXT_HTML };
 
     private final GStringTemplateEngine engine;
 
