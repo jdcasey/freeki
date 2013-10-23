@@ -61,6 +61,9 @@ public class FreekiConfig
     @Option( name = "-t", aliases = "--templates", usage = "Templates directory (default: $HOME/freeki/.templates)" )
     private File templatesDir;
 
+    @Option( name = "-A", aliases = "--no-autocreate", usage = "Disable auto-creation when links to missing pages are clicked" )
+    private boolean noAutoCreate;
+
     public FreekiConfig()
     {
     }
@@ -199,6 +202,16 @@ public class FreekiConfig
         {
             this.readOnly = overrides.readOnly;
         }
+    }
+
+    public boolean isAutoCreate()
+    {
+        return !noAutoCreate;
+    }
+
+    public void setAutoCreate( final boolean autoCreate )
+    {
+        this.noAutoCreate = !autoCreate;
     }
 
 }

@@ -307,13 +307,33 @@ public class PageContentHandler
 
         try
         {
-            final Page pg = store.getPage( dir, page );
+            Page pg = store.getPage( dir, page );
             if ( pg == null )
             {
-                req.response()
-                   .setStatusCode( 404 )
-                   .setStatusMessage( "Not found." )
-                   .end();
+                if ( auth.checkAutoCreate() )
+                {
+                    pg =
+                        new Page( dir, page, "#" + page + "\n\nThis page has been created automatically. Click the 'edit' button to enter content.",
+                                  page, System.currentTimeMillis(), "unknown" );
+
+                    store.storePage( pg );
+                    req.response()
+                       .headers()
+                       .add( "Location", req.uri() + "#editing" );
+                    req.response()
+                       .setStatusCode( 302 )
+                       .setStatusMessage( "Moved Temporarily" )
+                       .end();
+                }
+                else
+                {
+                    req.response()
+                       .setStatusCode( 404 )
+                       .setStatusMessage( "Not found." )
+                       .write( "404 Not found: " + req.path() )
+                       .end();
+                }
+
                 return;
             }
 

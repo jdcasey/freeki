@@ -55,6 +55,7 @@ if ( data.children ){
     <link rel="stylesheet" href="/static/css/branding.css"/>
   </head>
 <body>
+  <div id="page">
 <div id="group-branding-header" class="branding-header">
   <span class="freeki-plug">Look, another <a target="_new" href="https://github.com/jdcasey/freeki">Freeki</a> portable wiki!</span>
 </div>
@@ -78,7 +79,7 @@ if ( data.children ){
 <% if(mainPg){ %>
   <div class="embedded-content" page="${mainPg}" class="main-content"><span style="color: red;">Loading ${mainPg}. Please wait...</span></div>
 <% } else { %>
-  Select a page to view.
+  <div class="no-embedded-content">Select a page to view.</div>
 <% } %>
 </div>
 <% } %>
@@ -87,6 +88,8 @@ if ( data.children ){
 <div id="buttonbar-group-view" class="buttonbar">
   <button id="group-new-form-trigger">New...</button>
   <button id="delete-group">Delete</button>
+</div>
+<div id="buttonbar-group-global" class="buttonbar">
   <button id="push-updates">Push Updates</button>
 </div>
 <div id="group-new-panel" style="display:none">
@@ -151,5 +154,6 @@ if ( data.children ){
     </script>
     <script type="text/javascript" src="/static/js/branding.js"></script>
     <script type="text/javascript" src="/static/js/group-extras.js"></script>
-</body>
+    </div>
+  </body>
 </html>

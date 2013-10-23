@@ -43,4 +43,9 @@ public class Authorizer
         return false;
     }
 
+    public boolean checkAutoCreate()
+    {
+        return !config.isReadOnly() && config.isAutoCreate();
+    }
+
 }

@@ -18,7 +18,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 body{
-  margin-left: 100px;
+}
+
+#page {
+    min-height: 650px;
+}
+
+#group-main-content,
+#page-main-content {
+	min-height: 650px;
+}
+
+:not(.embedded-content) #page {
+  width: 1200px;
+  margin: auto;
+}
+
+.embedded-content #page {
+	width: 900px;
+	margin: auto;
+}
+
+.no-embedded-content {
+  font-style: italic;
+  text-align: center;
+  padding-top: 50px;
+  width: 200px;
+  margin: auto;
 }
 
 .branding-header{
@@ -192,6 +218,15 @@ a.breadcrumb {
     margin-top: 10px;
 }
 
-input,select{
+input,
+select{
 	margin-left: 10px;
+}
+
+#group-listing>ul {
+  margin-top: 3px;
+}
+
+#group-main-content {
+  padding-left: 50px;
 }

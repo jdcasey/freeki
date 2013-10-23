@@ -27,7 +27,18 @@ var group;
 
 var readonly;
 
+var originalHash;
+
+var ignoreConversion = false;
+
 function init( url, parent, groupName, readOnly ){
+	if ( window.location.hash == '#editing' ){
+		originalHash = '';
+	}
+	else {
+		originalHash = window.location.hash.substring(1);
+	}
+	
 	myUrl = url;
 	readonly = readOnly;
 //	alert( "myUrl is: " + myUrl );
@@ -53,8 +64,10 @@ function init( url, parent, groupName, readOnly ){
 		Markdown.Extra.init(converter, {highlighter: "prettify"});
 		
 		converter.hooks.chain("preConversion", function (text) {
-//			alert("Changed to: " + text );
-			editingPageContent = text;
+			if ( !ignoreConversion ){
+//				alert("Changed to: " + text );
+				editingPageContent = text;
+			}
 		  return text;
 		});
 		
@@ -72,18 +85,19 @@ function init( url, parent, groupName, readOnly ){
 		
 		$('#page-content').html(rendered);
 		
-		if ( window.location.hash == '#editing' ){
-			$('#edit-page').click();
-		}
-		else
-		{
-			$('#cancel-edit').click();
-		}
+		manageHash();
 	}
 }
 
+$(window).bind( 'hashchange', function(e) {
+	manageHash();
+});
+
 $('.preview-button').click(function(){
 	if ( readonly ){return;}
+	
+	// don't listen to any conversion events that happen within this method's execution
+	ignoreConversion = true;
 	
 	// bit non-obvious, but pagedown updates this pane in realtime, so we pull
 	// the html from there to display in our own preview pane. This wmd preview
@@ -92,27 +106,17 @@ $('.preview-button').click(function(){
 	var rendered = converter.makeHtml(content);
 	
 	$('#preview-panel').html(rendered);
+	
+	//reset this to listen to new conversion events and save changed content.
+	ignoreConversion = false;
 });
 
 $('#edit-page').click(function(){
-	if ( readonly ){return;}
-	
-  $('#page-content').hide();
-  
-  $('#buttonbar-edit-page').hide();
-  
-  window.location.hash = '#editing';
-  $('#wmd-input').text(pageContent);
-  $('#page-edit').show();
+	editPage();
 });
 
 $('#cancel-edit').click(function(){
-	if ( readonly ){return;}
-	
-  $('#page-edit').hide();
-  window.location.hash = null;
-  $('#page-content').show();
-  $('#buttonbar-edit-page').show();
+	cancelEdit();
 });
 
 $('#save-edit').click(function(){
@@ -386,4 +390,39 @@ function showTemplateForm(){
 			alert(msg);
 		}
 	});
+}
+
+function editPage() {
+	if ( readonly ){return;}
+	
+  $('#page-content').hide();
+  
+  $('#buttonbar-edit-page').hide();
+  
+  window.location.hash = '#editing';
+  $('#wmd-input').text(pageContent);
+  $('#page-edit').show();
+}
+
+function cancelEdit() {
+	if ( readonly ){return;}
+	
+  $('#page-edit').hide();
+  window.location.hash = originalHash;
+  $('#page-content').show();
+  $('#buttonbar-edit-page').show();
+}
+
+function manageHash() {
+	if ( window.location.hash == '#editing' ){
+		editPage();
+	}
+	else {
+		originalHash = window.location.hash.substring(1);
+		
+    var aTag = $("a[id='"+ originalHash +"']");
+    if ( aTag ) {
+      $('html, body').animate({scrollTop: aTag.offset().top}, 500);
+    }
+	}
 }

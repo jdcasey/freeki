@@ -27,20 +27,24 @@ if (!contentOnly){
     <title><% if( data.title ){ %>${data.title}<% }else{ %>${data.id}<% } %></title>
     <script type="text/javascript" src="/static/js/jquery.js"></script>
     <script type="text/javascript" src="/static/js/jquery-ui.js"></script>
-    <script type="text/javascript" src="/static/google-code-prettify/prettify.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Converter.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Sanitizer.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Extra.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
+    <script type="text/javascript" src="/static/google-code-prettify/run_prettify.js"></script>
     
     <link rel="stylesheet" href="/static/css/jquery-ui.css"/>
     <link rel="stylesheet" href="/static/css/pagedown.css"/>
     <link rel="stylesheet" href="/static/google-code-prettify/prettify.css"/>
+    <!-- 
+    <link rel="stylesheet" href="/static/google-code-prettify/sons-of-obsidian.css"/>
+    -->
     <link rel="stylesheet" href="/static/css/wikiMain.css"/>
     <link rel="stylesheet" href="/static/css/branding.css"/>
   </head>
  <% } %>
   <body>
+    <div id="page">
 <% if (!contentOnly){ %>
 <div id="page-branding-header" class="branding-header">
   <span id="freeki-plug">Look, another <a target="_new" href="https://github.com/jdcasey/freeki">Freeki</a> portable wiki!</span>
@@ -130,5 +134,6 @@ ${data.content}
   <script type="text/javascript" src="/static/js/branding.js"></script>
   <script type="text/javascript" src="/static/js/page-extras.js"></script>
  <% } %>
-</body>
+    </div>
+  </body>
 </html>
