@@ -32,60 +32,58 @@ var originalHash;
 var ignoreConversion = false;
 
 function init( url, parent, groupName, readOnly ){
-	if ( window.location.hash == '#editing' ){
-		originalHash = '';
-	}
-	else {
-		originalHash = window.location.hash.substring(1);
-	}
-	
 	myUrl = url;
 	readonly = readOnly;
-//	alert( "myUrl is: " + myUrl );
 	
 	parentUrl = parent;
 	group = groupName;
 	
-	$('div.embedded-content').each(function(){
-		var pg = $(this).attr('page').replace(' ', '%20');
-		if(group != '/' ){
-			pg = group + '/' + pg;
+	setOriginalHash();
+	
+	loadEmbeddedContent();
+	
+	converter = new Markdown.Converter();
+	Markdown.Extra.init(converter, {highlighter: "prettify"});
+	
+	if ( readonly ) {
+		var md = $('#markdown-content').text().trim();
+		
+		$('#rendered').remove();
+		$('#markdown').remove();
+		
+		alert( "content:\n\n" + md);
+		var rendered = converter.makeHtml(md);
+		
+		var pageContent = $('#page-content');
+	  $(pageContent).html(rendered);
+	  $(pageContent).trigger( 'contentUpdate', rendered );
+	}
+	else {
+		$('#editor-content').tabs();
+		
+		var mdPane = $('#wmd-input');
+		if ( mdPane ){
+			converter.hooks.chain("preConversion", function (text) {
+				if ( !ignoreConversion ){
+					editingPageContent = text;
+				}
+			  return text;
+			});
+			
+			editor = new Markdown.Editor(converter, "", {
+				title: "Wiki Formatting Help",
+				handler: function(click){
+					alert("Help clicked: " + JSON.stringify( click ) );
+				}
+			});
+			editor.run();
+			
+			pageContent = $(mdPane).text();
+			var rendered = converter.makeHtml(pageContent);
+			setPageContent( rendered );
+			
+			manageHash();
 		}
-		
-		$(this).load('/wiki/' + pg + '?format=content-only' );
-	});
-	
-	$('#editor-content').tabs();
-	
-	var mdPane = $('#wmd-input');
-	if ( mdPane ){
-		converter = new Markdown.Converter();
-		
-		Markdown.Extra.init(converter, {highlighter: "prettify"});
-		
-		converter.hooks.chain("preConversion", function (text) {
-			if ( !ignoreConversion ){
-//				alert("Changed to: " + text );
-				editingPageContent = text;
-			}
-		  return text;
-		});
-		
-		editor = new Markdown.Editor(converter, "", {
-			title: "Wiki Formatting Help",
-			handler: function(click){
-				alert("Help clicked: " + JSON.stringify( click ) );
-			}
-		});
-		editor.run();
-		
-		pageContent = $(mdPane).text();
-		
-		var rendered = converter.makeHtml(pageContent);
-		
-		$('#page-content').html(rendered);
-		
-		manageHash();
 	}
 }
 
@@ -104,7 +102,6 @@ $('.preview-button').click(function(){
 	// pane is display:none to suppress it in favor of our own.
 	var content = $('#wmd-preview').html();
 	var rendered = converter.makeHtml(content);
-	
 	$('#preview-panel').html(rendered);
 	
 	//reset this to listen to new conversion events and save changed content.
@@ -120,21 +117,7 @@ $('#cancel-edit').click(function(){
 });
 
 $('#save-edit').click(function(){
-	if ( readonly ){return;}
-	
-//	alert( "Updated content:\n\n" + editingPageContent );
-  
-  $.post(myUrl, editingPageContent, function(data, textStatus){
-      pageContent = editingPageContent;
-  	  $('#page-content').html(converter.makeHtml(pageContent));
-  	}, 
-  	'text'
-  );
-  
-  window.location.hash = null;
-  $('#page-edit').hide();
-  $('#page-content').show();
-  $('#buttonbar-edit-page').show();
+	saveEdit();
 });
 
 $('#delete-page,#delete-edit,#delete-group').click(function(){
@@ -392,6 +375,12 @@ function showTemplateForm(){
 	});
 }
 
+function setPageContent( pageHtml ) {
+	var pageContent = $('#page-content');
+  $(pageContent).html(pageHtml);
+  $(pageContent).trigger( 'contentUpdate', pageContent );
+}
+
 function editPage() {
 	if ( readonly ){return;}
 	
@@ -404,6 +393,24 @@ function editPage() {
   $('#page-edit').show();
 }
 
+function saveEdit() {
+	if ( readonly ){return;}
+		
+	//alert( "Updated content:\n\n" + editingPageContent );
+	
+	$.post(myUrl, editingPageContent, function(data, textStatus){
+	    pageContent = editingPageContent;
+	    setPageContent( converter.makeHtml( pageContent ) );
+		}, 
+		'text'
+	);
+	
+	window.location.hash = null;
+	$('#page-edit').hide();
+	$('#page-content').show();
+	$('#buttonbar-edit-page').show();
+}
+
 function cancelEdit() {
 	if ( readonly ){return;}
 	
@@ -411,6 +418,15 @@ function cancelEdit() {
   window.location.hash = originalHash;
   $('#page-content').show();
   $('#buttonbar-edit-page').show();
+}
+
+function setOriginalHash() {
+	if ( window.location.hash == '#editing' ){
+		originalHash = '';
+	}
+	else {
+		originalHash = window.location.hash.substring(1);
+	}
 }
 
 function manageHash() {
@@ -421,8 +437,19 @@ function manageHash() {
 		originalHash = window.location.hash.substring(1);
 		
     var aTag = $("a[id='"+ originalHash +"']");
-    if ( aTag ) {
+    if ( aTag && aTag.offset() ) {
       $('html, body').animate({scrollTop: aTag.offset().top}, 500);
     }
 	}
+}
+
+function loadEmbeddedContent() {
+	$('div.embedded-content').each(function(){
+		var pg = $(this).attr('page').replace(' ', '%20');
+		if(group != '/' ){
+			pg = group + '/' + pg;
+		}
+		
+		$(this).load('/wiki/' + pg + '?format=content-only' );
+	});
 }

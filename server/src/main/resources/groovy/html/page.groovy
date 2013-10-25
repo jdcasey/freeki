@@ -33,7 +33,7 @@ if (!contentOnly){
     <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
     <script type="text/javascript" src="/static/google-code-prettify/run_prettify.js"></script>
     
-    <link rel="stylesheet" href="/static/css/jquery-ui.css"/>
+    <link rel="stylesheet" href="/static/css/ui-lightness/jquery-ui.css"/>
     <link rel="stylesheet" href="/static/css/pagedown.css"/>
     <link rel="stylesheet" href="/static/google-code-prettify/prettify.css"/>
     <!-- 
@@ -57,7 +57,16 @@ if (!contentOnly){
 <div id="page-main" class="main-content">
 <% if( contentOnly || readOnly){ %>
 <div id="page-content">
-  ${rendered}
+<div id="rendered">
+${rendered}
+</div>
+</div>
+<div id="buttonbar-page-global" class="buttonbar">
+</div>
+<div style="display:none;" id="markdown">
+  <textarea id="markdown-content">
+${data.content}
+</textarea>
 </div>
 <% } else { %>
 <div id="page-content">
@@ -126,13 +135,13 @@ ${data.content}
 <% } %>
 
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>
+  <script type="text/javascript" src="/static/js/branding.js"></script>
+  <script type="text/javascript" src="/static/js/page-extras.js"></script>
   <script>
     \$(document).ready(function(){
       init('/api/page/${data.id}', '/wiki/${data.group}/', '${data.group}', ${readOnly} );
     });
   </script>
-  <script type="text/javascript" src="/static/js/branding.js"></script>
-  <script type="text/javascript" src="/static/js/page-extras.js"></script>
  <% } %>
     </div>
   </body>

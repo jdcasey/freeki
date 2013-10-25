@@ -49,7 +49,7 @@ if ( data.children ){
     <script type="text/javascript" src="/static/js/Markdown.Sanitizer.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
     
-    <link rel="stylesheet" href="/static/css/jquery-ui.css"/>
+    <link rel="stylesheet" href="/static/css/ui-lightness/jquery-ui.css"/>
     <link rel="stylesheet" href="/static/css/pagedown.css"/>
     <link rel="stylesheet" href="/static/css/wikiMain.css"/>
     <link rel="stylesheet" href="/static/css/branding.css"/>

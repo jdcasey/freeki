@@ -25,6 +25,8 @@ public class FreekiConfig
 
     private static final String USER_HOME = System.getProperty( "user.home" );
 
+    public static final File DEFAULT_EXPORTS_DIR = new File( USER_HOME, "freeki-exports" );
+
     public static final File DEFAULT_CONTENT_DIR = new File( USER_HOME, "freeki" );
 
     public static final String DEFAULT_BRANDING_SUBPATH = ".branding";
@@ -49,6 +51,9 @@ public class FreekiConfig
     @Option( name = "-c", aliases = "--content", usage = "Content directory (default: $HOME/freeki)" )
     private File contentDir;
 
+    @Option( name = "-e", aliases = "--exports", usage = "Content directory (default: $HOME/freeki-exports)" )
+    private File exportsDir;
+
     @Option( name = "-b", aliases = "--branding", usage = "Branding content directory (default: $HOME/freeki/.branding)" )
     private File brandingDir;
 
@@ -62,7 +67,10 @@ public class FreekiConfig
     private File templatesDir;
 
     @Option( name = "-A", aliases = "--no-autocreate", usage = "Disable auto-creation when links to missing pages are clicked" )
-    private boolean noAutoCreate;
+    private Boolean noAutoCreate;
+
+    @Option( name = "-D", aliases = "--debug", usage = "Enable debug options" )
+    private Boolean debug;
 
     public FreekiConfig()
     {
@@ -161,6 +169,36 @@ public class FreekiConfig
         this.port = port;
     }
 
+    public boolean isAutoCreate()
+    {
+        return !noAutoCreate;
+    }
+
+    public void setAutoCreate( final boolean autoCreate )
+    {
+        this.noAutoCreate = !autoCreate;
+    }
+
+    public boolean isDebug()
+    {
+        return debug;
+    }
+
+    public void setDebug( final boolean debug )
+    {
+        this.debug = debug;
+    }
+
+    public File getExportsDir()
+    {
+        return exportsDir == null ? DEFAULT_EXPORTS_DIR : exportsDir;
+    }
+
+    public void setExportsDir( final File exportsDir )
+    {
+        this.exportsDir = exportsDir;
+    }
+
     public void overrideWith( final FreekiConfig overrides )
     {
         if ( overrides.help != null )
@@ -202,16 +240,21 @@ public class FreekiConfig
         {
             this.readOnly = overrides.readOnly;
         }
-    }
 
-    public boolean isAutoCreate()
-    {
-        return !noAutoCreate;
-    }
+        if ( overrides.noAutoCreate != null )
+        {
+            this.noAutoCreate = overrides.noAutoCreate;
+        }
 
-    public void setAutoCreate( final boolean autoCreate )
-    {
-        this.noAutoCreate = !autoCreate;
+        if ( overrides.exportsDir != null )
+        {
+            this.exportsDir = overrides.exportsDir;
+        }
+
+        if ( overrides.debug != null )
+        {
+            this.debug = overrides.debug;
+        }
     }
 
 }

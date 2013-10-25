@@ -36,6 +36,7 @@ import org.commonjava.freeki.infra.render.RenderingEngine;
 import org.commonjava.freeki.infra.render.json.JsonRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTHtmlRenderer;
 import org.commonjava.freeki.infra.render.tmpl.GTTextRenderer;
+import org.commonjava.freeki.rest.ExportContentHandler;
 import org.commonjava.freeki.rest.GroupContentHandler;
 import org.commonjava.freeki.rest.PageContentHandler;
 import org.commonjava.freeki.rest.StaticContentHandler;
@@ -167,6 +168,7 @@ public class Main
                 add( staticContent );
                 add( new UpdateHandler( git ) );
                 add( new TemplateContentHandler( new TemplateController( store, config ), serializer ) );
+                add( new ExportContentHandler( config, store ) );
             }
         };
 

@@ -59,6 +59,13 @@ public class StaticContentHandler
 
         final String path = req.params()
                                .get( PATH.param() );
+        if ( path == null )
+        {
+            req.response()
+               .setStatusMessage( "Not found" )
+               .setStatusCode( 404 )
+               .end();
+        }
 
         //        logger.info( "Serving static path: '%s'", path );
 
@@ -133,6 +140,10 @@ public class StaticContentHandler
     // For fall-back 404 handler
     public void handle( final HttpServerRequest req )
     {
+        req.params()
+           .add( PATH.param(), req.absoluteURI()
+                                  .getPath() );
+
         get( req );
     }
 }

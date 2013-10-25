@@ -191,7 +191,7 @@ public class GroupContentHandler
 
         //        System.out.printf( "Directory: %s\n", dir );
 
-        final String mimeAccept = MIMEParse.bestMatch( DIR_ACCEPT, acceptHeader );
+        final String mimeAccept = acceptHeader == null ? TEXT_HTML.value() : MIMEParse.bestMatch( DIR_ACCEPT, acceptHeader );
         final ContentType type = ContentType.find( mimeAccept );
 
         try

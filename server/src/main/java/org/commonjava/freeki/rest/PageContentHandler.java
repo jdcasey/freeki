@@ -298,7 +298,7 @@ public class PageContentHandler
             final String acceptHeader = req.headers()
                                            .get( "Accept" );
 
-            mimeAccept = MIMEParse.bestMatch( PAGE_ACCEPT, acceptHeader );
+            mimeAccept = acceptHeader == null ? TEXT_HTML.value() : MIMEParse.bestMatch( PAGE_ACCEPT, acceptHeader );
         }
 
         final ContentType type = ContentType.find( mimeAccept );
