@@ -92,6 +92,8 @@ public class WebstartMain
                         e.printStackTrace();
                         main.stop();
                     }
+
+                    System.out.println( "Wiki STOPPED" );
                 }
             } ).start();
         }
