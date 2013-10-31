@@ -51,7 +51,6 @@ function init( url, parent, groupName, readOnly ){
 		$('#rendered').remove();
 		$('#markdown').remove();
 		
-		alert( "content:\n\n" + md);
 		var rendered = converter.makeHtml(md);
 		
 		var pageContent = $('#page-content');
