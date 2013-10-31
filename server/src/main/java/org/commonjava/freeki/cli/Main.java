@@ -16,6 +16,7 @@
  ******************************************************************************/
 package org.commonjava.freeki.cli;
 
+import static org.apache.commons.lang.StringUtils.join;
 import groovy.text.GStringTemplateEngine;
 
 import java.io.IOException;
@@ -183,6 +184,8 @@ public class Main
              .requestHandler( router )
              .listen( config.getPort(), listen );
 
+        printDiagnostics( git, config );
+
         System.out.printf( "Listening for requests on %s:%s\n\n", config.getListen(), config.getPort() );
 
         synchronized ( this )
@@ -197,6 +200,14 @@ public class Main
                 e.printStackTrace();
             }
         }
+    }
+
+    private void printDiagnostics( final GitManager git, final FreekiConfig config )
+    {
+        System.out.printf( "Classpath:\n  %s\n\nGit 'origin' URL:\n  %s\n\nGit 'canonical' URL:\n  %s\n\nContent Directory:\n  %s\n\n",
+                           join( System.getProperty( "java.class.path" )
+                                       .split( ":" ), "\n  " ), git.getOriginUrl(), git.getCanonicalUrl(), config.getContentDir()
+                                                                                                                 .getAbsolutePath() );
     }
 
     @Override

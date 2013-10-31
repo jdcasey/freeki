@@ -254,4 +254,18 @@ public class GitManager
             throw new IOException( "Cannot push content updates via git: " + e.getMessage(), e );
         }
     }
+
+    public String getOriginUrl()
+    {
+        return git.getRepository()
+                  .getConfig()
+                  .getString( "remote", "origin", "url" );
+    }
+
+    public String getCanonicalUrl()
+    {
+        return git.getRepository()
+                  .getConfig()
+                  .getString( "remote", "canonical", "url" );
+    }
 }
