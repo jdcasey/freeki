@@ -17,6 +17,7 @@
 package org.commonjava.freeki.conf;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 import org.kohsuke.args4j.Option;
 
@@ -49,7 +50,7 @@ public class FreekiConfig
     private String listen;
 
     @Option( name = "-c", aliases = "--content", usage = "Content directory (default: $HOME/freeki)" )
-    private File contentDir;
+    private String contentDir;
 
     @Option( name = "-e", aliases = "--exports", usage = "Content directory (default: $HOME/freeki-exports)" )
     private File exportsDir;
@@ -72,6 +73,9 @@ public class FreekiConfig
     @Option( name = "-D", aliases = "--debug", usage = "Enable debug options" )
     private Boolean debug;
 
+    @Option( name = "-C", aliases = "--clone", usage = "Clone repo (URL)" )
+    private String cloneFrom;
+
     public FreekiConfig()
     {
     }
@@ -83,7 +87,7 @@ public class FreekiConfig
 
     public FreekiConfig( final File contentDir, final File brandingDir, final File staticDir, final File templatesDir )
     {
-        this.contentDir = contentDir;
+        this.contentDir = contentDir.getAbsolutePath();
         this.brandingDir = brandingDir;
         this.staticDir = staticDir;
         this.templatesDir = templatesDir;
@@ -91,12 +95,19 @@ public class FreekiConfig
 
     public File getContentDir()
     {
-        return contentDir == null ? DEFAULT_CONTENT_DIR : contentDir;
+        return contentDir == null ? DEFAULT_CONTENT_DIR : new File( eval( contentDir ) );
+    }
+
+    private String eval( final String value )
+    {
+        String result = value.replaceAll( Pattern.quote( "${user.home}" ), System.getProperty( "user.home" ) );
+        result = value.replaceAll( "@user.home@?", System.getProperty( "user.home" ) );
+        return result;
     }
 
     public void setContentDir( final File contentDir )
     {
-        this.contentDir = contentDir;
+        this.contentDir = contentDir.getAbsolutePath();
     }
 
     public File getBrandingDir()
@@ -255,6 +266,21 @@ public class FreekiConfig
         {
             this.debug = overrides.debug;
         }
+
+        if ( overrides.cloneFrom != null )
+        {
+            this.cloneFrom = overrides.cloneFrom;
+        }
+    }
+
+    public String getCloneFrom()
+    {
+        return cloneFrom;
+    }
+
+    public void setCloneFrom( final String cloneFrom )
+    {
+        this.cloneFrom = cloneFrom;
     }
 
 }

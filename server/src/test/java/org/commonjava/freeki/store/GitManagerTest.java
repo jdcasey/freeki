@@ -23,14 +23,17 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 
+import org.apache.log4j.Level;
 import org.commonjava.freeki.conf.FreekiConfig;
 import org.commonjava.freeki.data.FreekiStore;
 import org.commonjava.freeki.data.GitManager;
 import org.commonjava.freeki.model.Page;
+import org.commonjava.util.logging.Log4jUtil;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revplot.PlotCommit;
 import org.eclipse.jgit.revplot.PlotLane;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -47,11 +50,19 @@ public class GitManagerTest
 
     private GitManager git;
 
+    @BeforeClass
+    public static void setupLogging()
+    {
+        Log4jUtil.configure( Level.DEBUG );
+    }
+
     @Before
     public void setup()
         throws Exception
     {
         dir = temp.newFolder( "freeki" );
+        dir.delete();
+
         final FreekiConfig config = new FreekiConfig( dir );
         git = new GitManager( config );
         store = new FreekiStore( config, git );

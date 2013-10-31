@@ -58,7 +58,7 @@ if (!contentOnly){
 <% if( contentOnly || readOnly){ %>
 <div id="page-content">
 <div id="rendered">
-${rendered}
+${data.content}
 </div>
 </div>
 <div id="buttonbar-page-global" class="buttonbar">

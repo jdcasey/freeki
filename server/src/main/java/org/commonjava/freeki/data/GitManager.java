@@ -9,12 +9,15 @@ import java.util.Collection;
 import javax.annotation.PostConstruct;
 
 import org.commonjava.freeki.conf.FreekiConfig;
+import org.commonjava.util.logging.Logger;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revplot.PlotCommit;
@@ -31,6 +34,8 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 public class GitManager
 {
+
+    private final Logger logger = new Logger( getClass() );
 
     private FreekiConfig config;
 
@@ -49,7 +54,7 @@ public class GitManager
     }
 
     public GitManager( final FreekiConfig config )
-        throws IOException
+        throws IOException, InvalidRemoteException, TransportException, GitAPIException
     {
         this.config = config;
         setupGit();
@@ -57,19 +62,37 @@ public class GitManager
 
     @PostConstruct
     public void setupGit()
-        throws IOException
+        throws IOException, InvalidRemoteException, TransportException, GitAPIException
     {
         basepathLength = config.getContentDir()
                                .getPath()
                                .length() + 1;
 
-        final File gitDir = new File( config.getContentDir(), ".git" );
-        final boolean create = !gitDir.isDirectory();
+        final File gitDir = config.getContentDir();
+        final String cloneUrl = config.getCloneFrom();
 
-        final FileRepositoryBuilder builder = new FileRepositoryBuilder().setGitDir( gitDir )
-                                                                         .readEnvironment();
+        if ( cloneUrl != null )
+        {
+            logger.info( "Cloning: %s into: %s", cloneUrl, gitDir );
+            if ( gitDir.isDirectory() )
+            {
+                throw new IOException( "Cannot clone into directory: " + gitDir + ". It already exists!" );
+            }
 
-        repo = builder.build();
+            Git.cloneRepository()
+               .setURI( cloneUrl )
+               .setDirectory( gitDir )
+               .setRemote( "canonical" )
+               .call();
+        }
+
+        final File dotGitDir = new File( gitDir, ".git" );
+        final boolean create = cloneUrl == null && !dotGitDir.isDirectory();
+
+        logger.info( "Setting up git manager for: %s", dotGitDir );
+        repo = new FileRepositoryBuilder().readEnvironment()
+                                          .setGitDir( dotGitDir )
+                                          .build();
 
         username = repo.getConfig()
                        .getString( "user", null, "name" );

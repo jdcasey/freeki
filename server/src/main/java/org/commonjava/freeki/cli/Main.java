@@ -47,9 +47,11 @@ import org.commonjava.vertx.vabr.ApplicationRouter;
 import org.commonjava.vertx.vabr.RouteCollection;
 import org.commonjava.vertx.vabr.RouteHandler;
 import org.commonjava.web.json.ser.JsonSerializer;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-import org.pegdown.PegDownProcessor;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.impl.DefaultVertx;
 import org.vertx.java.platform.Verticle;
@@ -59,12 +61,12 @@ public class Main
 {
 
     public static void main( final String[] args )
-        throws IOException
+        throws Exception
     {
         new Main( args ).run();
     }
 
-    private final PegDownProcessor proc;
+    //    private final PegDownProcessor proc;
 
     private final GStringTemplateEngine templates;
 
@@ -95,12 +97,12 @@ public class Main
 
         if ( canStart )
         {
-            proc = new PegDownProcessor();
+            //            proc = new PegDownProcessor();
             templates = new GStringTemplateEngine();
         }
         else
         {
-            proc = null;
+            //            proc = null;
             templates = null;
         }
     }
@@ -124,7 +126,7 @@ public class Main
     }
 
     public void run()
-        throws IOException
+        throws IOException, InvalidRemoteException, TransportException, GitAPIException
     {
         if ( !canStart )
         {
@@ -147,7 +149,7 @@ public class Main
         final GTemplateConfig templateConfig = new GTemplateConfig( rawTemplateConf, config );
 
         final Set<ContentRenderer> renderers = new HashSet<>();
-        renderers.add( new GTHtmlRenderer( templates, proc, templateConfig ) );
+        renderers.add( new GTHtmlRenderer( templates, /*proc,*/templateConfig ) );
         renderers.add( new GTTextRenderer( templates, templateConfig ) );
 
         final JsonSerializer serializer = new JsonSerializer(/* new PrettyPrintingAdapter() */);
@@ -195,5 +197,13 @@ public class Main
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void stop()
+    {
+        Thread.currentThread()
+              .interrupt();
+        vertx.stop();
     }
 }

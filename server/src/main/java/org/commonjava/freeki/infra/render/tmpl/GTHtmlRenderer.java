@@ -35,7 +35,6 @@ import org.commonjava.freeki.conf.GTemplateConfig;
 import org.commonjava.freeki.infra.render.ContentRenderer;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.util.ContentType;
-import org.pegdown.PegDownProcessor;
 
 public class GTHtmlRenderer
     implements ContentRenderer
@@ -45,14 +44,14 @@ public class GTHtmlRenderer
 
     private final GStringTemplateEngine engine;
 
-    private final PegDownProcessor proc;
+    //    private final PegDownProcessor proc;
 
     private final GTemplateConfig config;
 
-    public GTHtmlRenderer( final GStringTemplateEngine engine, final PegDownProcessor proc, final GTemplateConfig config )
+    public GTHtmlRenderer( final GStringTemplateEngine engine, /*final PegDownProcessor proc,*/final GTemplateConfig config )
     {
         this.engine = engine;
-        this.proc = proc;
+        //        this.proc = proc;
         this.config = config;
     }
 
@@ -95,8 +94,8 @@ public class GTHtmlRenderer
             if ( content != null )
             {
                 //                System.out.printf( "Extracted raw content:\n\n%s\n\n", content );
-                final String renderedMarkdown = proc.markdownToHtml( content );
-                map.put( "rendered", renderedMarkdown );
+                //                final String renderedMarkdown = proc.markdownToHtml( content );
+                //                map.put( "rendered", renderedMarkdown );
             }
 
             final Template template;

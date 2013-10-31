@@ -82,10 +82,6 @@
       <artifactId>mimeparse</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.pegdown</groupId>
-      <artifactId>pegdown</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-templates</artifactId>
     </dependency>
@@ -195,16 +191,40 @@
                   <manifest>
                     <mainClass>org.commonjava.freeki.cli.Main</mainClass>
                   </manifest>
+                  <manifestEntries>
+                    <Permissions>all-permissions</Permissions>
+                  </manifestEntries>
                 </archive>
               </configuration>
             </execution>
           </executions>
         </plugin>
-       </plugins>
+        <plugin>
+          <artifactId>maven-jarsigner-plugin</artifactId>
+          <version>1.2</version>
+          <executions>
+            <execution>
+              <id>sign</id>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <keystore>${project.basedir}/keystore</keystore>
+            <alias>jarsigner</alias>
+            <storepass>signit</storepass>
+            <keypass>${freeki-sign-keypasswd}</keypass>
+          </configuration>
+        </plugin>
+      </plugins>
     </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-jarsigner-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
