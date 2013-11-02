@@ -40,8 +40,8 @@ function init( url, parent, groupName, readOnly ){
 	
 	setOriginalHash();
 	
-	loadEmbeddedContent();
-	
+  loadEmbeddedContent();
+  
 	converter = new Markdown.Converter();
 	Markdown.Extra.init(converter, {highlighter: "prettify"});
 	
@@ -444,11 +444,17 @@ function manageHash() {
 
 function loadEmbeddedContent() {
 	$('div.embedded-content').each(function(){
-		var pg = $(this).attr('page').replace(' ', '%20');
+		$(this).removeAttr('class');
+		var pg = $(this).attr('page');
+//		pg = pg.replace(/\s+/g, "%20");
+		
 		if(group != '/' ){
 			pg = group + '/' + pg;
 		}
 		
-		$(this).load('/wiki/' + pg + '?format=content-only' );
+		alert( "pre-normalization: '/wiki/" + pg + "?format=content-only'" );
+		var url = '/wiki/' + encodeURIComponent(pg) + '?format=content-only';
+		$(this).html("Loading: " + url);
+		$(this).load(url);
 	});
 }

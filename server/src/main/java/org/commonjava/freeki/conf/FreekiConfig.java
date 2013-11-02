@@ -182,7 +182,7 @@ public class FreekiConfig
 
     public boolean isAutoCreate()
     {
-        return !noAutoCreate;
+        return noAutoCreate == null ? true : !noAutoCreate;
     }
 
     public void setAutoCreate( final boolean autoCreate )

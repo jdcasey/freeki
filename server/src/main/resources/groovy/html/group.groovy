@@ -47,6 +47,7 @@ if ( data.children ){
     <script type="text/javascript" src="/static/js/jquery-ui.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Converter.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Sanitizer.js"></script>
+    <script type="text/javascript" src="/static/js/Markdown.Extra.js"></script>
     <script type="text/javascript" src="/static/js/Markdown.Editor.js"></script>
     
     <link rel="stylesheet" href="/static/css/ui-lightness/jquery-ui.css"/>
@@ -147,6 +148,8 @@ if ( data.children ){
   </div>
 <% } %>
     <script type="text/javascript" src="/static/js/wikiMain.js"></script>
+    <% if ( !contentOnly ){ %>
+    <% } %>
     <script>
         \$(document).ready(function(){
           init('/api/group/${data.name}', '/wiki/${data.parent}/', '${data.name}', ${readOnly} );

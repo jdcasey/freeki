@@ -18,8 +18,6 @@
  ******************************************************************************/
 %>
 <% 
-def contentOnly = 'content-only'.equals(params.get('format'))
-System.out.println(params)
 if (!contentOnly){
 %>
 <html>
@@ -58,7 +56,7 @@ if (!contentOnly){
 <% if( contentOnly || readOnly){ %>
 <div id="page-content">
 <div id="rendered">
-${data.content}
+${rendered}
 </div>
 </div>
 <div id="buttonbar-page-global" class="buttonbar">
@@ -137,6 +135,8 @@ ${data.content}
   <script type="text/javascript" src="/static/js/wikiMain.js"></script>
   <script type="text/javascript" src="/static/js/branding.js"></script>
   <script type="text/javascript" src="/static/js/page-extras.js"></script>
+  <% if (!contentOnly){ %>
+  <% } %>
   <script>
     \$(document).ready(function(){
       init('/api/page/${data.id}', '/wiki/${data.group}/', '${data.group}', ${readOnly} );

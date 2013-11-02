@@ -35,6 +35,7 @@ import org.commonjava.freeki.conf.GTemplateConfig;
 import org.commonjava.freeki.infra.render.ContentRenderer;
 import org.commonjava.freeki.infra.render.RenderingException;
 import org.commonjava.freeki.util.ContentType;
+import org.markdown4j.Markdown4jProcessor;
 
 public class GTHtmlRenderer
     implements ContentRenderer
@@ -72,6 +73,7 @@ public class GTHtmlRenderer
             final Map<String, Object> map = new HashMap<String, Object>();
             map.put( "data", data );
             map.put( "readOnly", config.isReadOnly() );
+            map.put( "contentOnly", requestParams != null && "content-only".equals( requestParams.get( "format" ) ) );
             map.put( "params", requestParams );
 
             final String ct = getContentTemplate( data );
@@ -93,9 +95,9 @@ public class GTHtmlRenderer
 
             if ( content != null )
             {
-                //                System.out.printf( "Extracted raw content:\n\n%s\n\n", content );
-                //                final String renderedMarkdown = proc.markdownToHtml( content );
-                //                map.put( "rendered", renderedMarkdown );
+                System.out.printf( "Extracted raw content:\n\n%s\n\n", content );
+                final String renderedMarkdown = new Markdown4jProcessor().process( content );
+                map.put( "rendered", renderedMarkdown );
             }
 
             final Template template;
