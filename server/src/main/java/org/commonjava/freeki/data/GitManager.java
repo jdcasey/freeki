@@ -71,12 +71,13 @@ public class GitManager
         final File gitDir = config.getContentDir();
         final String cloneUrl = config.getCloneFrom();
 
+        boolean checkCanonicalUpdate = false;
         if ( cloneUrl != null )
         {
             logger.info( "Cloning: %s into: %s", cloneUrl, gitDir );
             if ( gitDir.isDirectory() )
             {
-                throw new IOException( "Cannot clone into directory: " + gitDir + ". It already exists!" );
+                checkCanonicalUpdate = true;
             }
 
             Git.cloneRepository()
@@ -117,6 +118,23 @@ public class GitManager
         }
 
         git = new Git( repo );
+
+        if ( checkCanonicalUpdate )
+        {
+            final String canonical = getCanonicalUrl();
+            if ( config.getCloneFrom()
+                       .equals( canonical ) )
+            {
+                git.fetch()
+                   .setRemote( "canonical" )
+                   .call();
+            }
+            else
+            {
+                throw new IOException( "Invalid content detected! Canonical URL: " + canonical + " differs from clone-from URL: "
+                    + config.getCloneFrom() );
+            }
+        }
     }
 
     public void addAndCommit( final String message, final File... files )
