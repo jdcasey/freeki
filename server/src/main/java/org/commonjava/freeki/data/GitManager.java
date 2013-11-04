@@ -79,16 +79,17 @@ public class GitManager
             {
                 checkCanonicalUpdate = true;
             }
-
-            Git.cloneRepository()
-               .setURI( cloneUrl )
-               .setDirectory( gitDir )
-               .setRemote( "canonical" )
-               .call();
+            else
+            {
+                Git.cloneRepository()
+                   .setURI( cloneUrl )
+                   .setDirectory( gitDir )
+                   .setRemote( "canonical" )
+                   .call();
+            }
         }
 
         final File dotGitDir = new File( gitDir, ".git" );
-        final boolean create = cloneUrl == null && !dotGitDir.isDirectory();
 
         logger.info( "Setting up git manager for: %s", dotGitDir );
         repo = new FileRepositoryBuilder().readEnvironment()
@@ -112,7 +113,7 @@ public class GitManager
                                                 .getCanonicalHostName();
         }
 
-        if ( create )
+        if ( !dotGitDir.isDirectory() )
         {
             repo.create();
         }
